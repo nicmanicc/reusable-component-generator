@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ComponentGenerator } from './components/ComponentGenerator';
 import { CodeViewer } from './components/CodeViewer';
 import { ComponentPreview } from './components/ComponentPreview';
 import { ChatInterface } from './components/ChatInterface';
 import { HistoryPanel } from './components/HistoryPanel';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Moon, Sun } from 'lucide-react';
 import {
   SandpackProvider,
 } from "@codesandbox/sandpack-react";
@@ -40,6 +40,30 @@ export default function App() {
   const [history, setHistory] = useState<GeneratedComponent[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Check for saved dark mode preference
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode === 'true') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(prev => {
+      const newMode = !prev;
+      if (newMode) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('darkMode', 'true');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('darkMode', 'false');
+      }
+      return newMode;
+    });
+  };
 
   const handleGenerate = async (prompt: string, isRefinement: boolean = false) => {
     setIsGenerating(true);
@@ -88,9 +112,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-linear-to-br dark:from-slate-900 dark:to-slate-800 from-slate-50 to-slate-100  ">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm">
         <div className="max-w-screen-2xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -98,18 +122,27 @@ export default function App() {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-slate-900">AI Component Generator</h1>
-                <p className="text-sm text-slate-500">Create reusable React components with AI</p>
+                <h1 className="text-slate-900 dark:text-white">AI Component Generator</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Create reusable React components with AI</p>
               </div>
             </div>
-            {history.length > 0 && (
+            <div className="flex items-center gap-2">
               <button
-                onClick={handleClear}
-                className="px-4 py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                onClick={toggleDarkMode}
+                className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                Clear All
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
-            )}
+              {history.length > 0 && (
+                <button
+                  onClick={handleClear}
+                  className="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -137,14 +170,14 @@ export default function App() {
 
             {/* Center - Preview & Code */}
             <div className="lg:col-span-6">
-              <SandpackProvider template="react-ts" options={{
+              <SandpackProvider template="react-ts" theme={isDarkMode ? "dark" : "light"} options={{
                 externalResources: ["https://cdn.tailwindcss.com"],
               }} files={{
                 '/App.tsx': currentComponent.code,
 
               }}>
                 <ComponentPreview code={currentComponent.code} />
-                <CodeViewer code={currentComponent.code} />
+                <CodeViewer code={currentComponent.code} setCurrentComponent={setCurrentComponent} />
               </SandpackProvider>
 
             </div>
