@@ -1,6 +1,3 @@
-'use client';
-
-import { useState } from 'react';
 import { Eye } from 'lucide-react';
 import {
   SandpackProvider,
@@ -11,8 +8,6 @@ import {
 interface ComponentPreviewProps {
   code: string;
 }
-
-
 
 export function ComponentPreview({ code }: ComponentPreviewProps) {
   return (
@@ -29,16 +24,9 @@ export function ComponentPreview({ code }: ComponentPreviewProps) {
       <div className="p-8 min-h-100 flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100">
         {code ? (
           <div className="w-full flex items-center justify-center">
-            <SandpackProvider style={{ flexBasis: '100%' }} template="react-ts" options={{
-              externalResources: ["https://cdn.tailwindcss.com"],
-            }} files={{
-              '/App.tsx': code,
-
-            }}>
-              <SandpackLayout >
-                <SandpackPreview />
-              </SandpackLayout>
-            </SandpackProvider>
+            <SandpackLayout style={{ flexBasis: '100%' }}  >
+              <SandpackPreview />
+            </SandpackLayout>
           </div>
         ) : (
           <div className="text-slate-400">Loading preview...</div>

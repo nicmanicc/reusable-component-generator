@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import { Code, Copy, Check } from 'lucide-react';
+import {
+  SandpackProvider,
+  SandpackLayout,
+  SandpackCodeEditor,
+} from "@codesandbox/sandpack-react";
 
 interface CodeViewerProps {
   code: string;
@@ -17,7 +22,7 @@ export function CodeViewer({ code }: CodeViewerProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-xl my-6 shadow-lg border border-slate-200 overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -44,9 +49,9 @@ export function CodeViewer({ code }: CodeViewerProps) {
 
       {/* Code Display */}
       <div className="relative">
-        <pre className="p-6 overflow-x-auto bg-slate-900 text-slate-100">
-          <code className="text-sm">{code}</code>
-        </pre>
+        <SandpackLayout >
+          <SandpackCodeEditor />
+        </SandpackLayout>
       </div>
     </div>
   );

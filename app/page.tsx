@@ -7,6 +7,9 @@ import { ComponentPreview } from './components/ComponentPreview';
 import { ChatInterface } from './components/ChatInterface';
 import { HistoryPanel } from './components/HistoryPanel';
 import { Sparkles } from 'lucide-react';
+import {
+  SandpackProvider,
+} from "@codesandbox/sandpack-react";
 
 export interface GeneratedComponent {
   id: string;
@@ -133,9 +136,17 @@ export default function App() {
             </div>
 
             {/* Center - Preview & Code */}
-            <div className="lg:col-span-6 space-y-6">
-              <ComponentPreview code={currentComponent.code} />
-              <CodeViewer code={currentComponent.code} />
+            <div className="lg:col-span-6">
+              <SandpackProvider template="react-ts" options={{
+                externalResources: ["https://cdn.tailwindcss.com"],
+              }} files={{
+                '/App.tsx': currentComponent.code,
+
+              }}>
+                <ComponentPreview code={currentComponent.code} />
+                <CodeViewer code={currentComponent.code} />
+              </SandpackProvider>
+
             </div>
 
             {/* Right Sidebar - Chat Refinement */}
