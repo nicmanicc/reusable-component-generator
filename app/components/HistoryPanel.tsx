@@ -56,8 +56,8 @@ export function HistoryPanel({ history, currentId, onRevert }: HistoryPanelProps
                       <div className="flex items-center gap-2 mb-1">
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${isActive
-                              ? 'bg-indigo-600 text-white'
-                              : 'bg-slate-200 text-slate-600'
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-slate-200 text-slate-600'
                             }`}
                         >
                           v{reverseIndex + 1}
@@ -79,7 +79,7 @@ export function HistoryPanel({ history, currentId, onRevert }: HistoryPanelProps
                           e.stopPropagation();
                           onRevert(item);
                         }}
-                        className="flex-shrink-0 p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="shrink-0 p-2 hover:bg-slate-100 rounded-lg transition-colors"
                         title="Revert to this version"
                       >
                         <RotateCcw className="w-4 h-4 text-slate-600" />

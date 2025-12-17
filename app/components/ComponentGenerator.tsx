@@ -56,7 +56,7 @@ export function ComponentGenerator({ onGenerate, isGenerating }: ComponentGenera
         <button
           type="submit"
           disabled={!prompt.trim() || isGenerating}
-          className="w-full px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+          className="w-full px-8 py-4 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
         >
           {isGenerating ? (
             <>

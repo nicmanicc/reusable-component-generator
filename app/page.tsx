@@ -85,13 +85,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100">
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-screen-2xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
+              <div className="bg-linear-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
