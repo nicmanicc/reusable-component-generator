@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, User, Sparkles } from 'lucide-react';
-import { ChatMessage } from '../App';
+import { ChatMessage } from '../page';
 
 interface ChatInterfaceProps {
   messages: ChatMessage[];
@@ -90,8 +90,8 @@ export function ChatInterface({ messages, onSendMessage, isGenerating }: ChatInt
               )}
               <div
                 className={`max-w-[80%] rounded-lg px-4 py-3 ${message.role === 'user'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 text-slate-900'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-slate-100 text-slate-900'
                   }`}
               >
                 <p className="text-sm">{message.content}</p>
