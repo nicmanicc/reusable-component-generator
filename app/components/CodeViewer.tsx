@@ -7,25 +7,20 @@ import {
   SandpackLayout,
   SandpackCodeEditor,
 } from "@codesandbox/sandpack-react";
-
 interface CodeViewerProps {
-  code: string;
-  setCurrentComponent: (component: any) => void;
+  onCodeChanged: (code: string) => void;
 }
 
-export function CodeViewer({ code, setCurrentComponent }: CodeViewerProps) {
+export function CodeViewer({ onCodeChanged }: CodeViewerProps) {
   const [copied, setCopied] = useState(false);
   const { code: activeCode } = useActiveCode();
 
   useEffect(() => {
-    setCurrentComponent((prev: any) => ({
-      ...prev,
-      code: activeCode,
-    }));
-  }, [activeCode, setCurrentComponent]);
+    onCodeChanged(activeCode);
+  }, [activeCode]);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(code);
+    await navigator.clipboard.writeText(activeCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -59,7 +54,7 @@ export function CodeViewer({ code, setCurrentComponent }: CodeViewerProps) {
       {/* Code Display */}
       <div className="relative">
         <SandpackLayout >
-          <SandpackCodeEditor />
+          <SandpackCodeEditor showLineNumbers />
         </SandpackLayout>
       </div>
     </div>

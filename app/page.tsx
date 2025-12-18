@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ComponentGenerator } from './components/ComponentGenerator';
 import { CodeViewer } from './components/CodeViewer';
 import { ComponentPreview } from './components/ComponentPreview';
@@ -10,7 +10,7 @@ import { Sparkles, Moon, Sun } from 'lucide-react';
 import {
   SandpackProvider,
 } from "@codesandbox/sandpack-react";
-
+import type { SandpackFiles } from '@codesandbox/sandpack-react';
 export interface GeneratedComponent {
   id: string;
   code: string;
@@ -41,6 +41,15 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [updatedCode, setUpdatedCode] = useState<string>('');
+
+  const sandpackFiles: SandpackFiles | undefined = useMemo(
+    () =>
+      currentComponent
+        ? { "/App.tsx": currentComponent.code }
+        : undefined,
+    [currentComponent?.id, currentComponent?.code]
+  );
 
   useEffect(() => {
     // Check for saved dark mode preference
@@ -78,10 +87,11 @@ export default function App() {
 
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1500));
-
+    // Call the AI service to get the generated/updated component code
+    // For demo purposes, Im using mockComponent or updatedCode
     const newComponent: GeneratedComponent = {
       id: Date.now().toString(),
-      code: mockComponent,
+      code: updatedCode,
       timestamp: new Date(),
       prompt: prompt,
     };
@@ -170,14 +180,11 @@ export default function App() {
 
             {/* Center - Preview & Code */}
             <div className="lg:col-span-6">
-              <SandpackProvider template="react-ts" theme={isDarkMode ? "dark" : "light"} options={{
+              <SandpackProvider template="react-ts" options={{
                 externalResources: ["https://cdn.tailwindcss.com"],
-              }} files={{
-                '/App.tsx': currentComponent.code,
-
-              }}>
+              }} files={sandpackFiles}>
                 <ComponentPreview code={currentComponent.code} />
-                <CodeViewer code={currentComponent.code} setCurrentComponent={setCurrentComponent} />
+                <CodeViewer onCodeChanged={setUpdatedCode} />
               </SandpackProvider>
 
             </div>
