@@ -89,9 +89,10 @@ export default function App() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     // Call the AI service to get the generated/updated component code
     // For demo purposes, Im using mockComponent or updatedCode
+    const codeToUse = isRefinement && currentComponent ? updatedCode : mockComponent;
     const newComponent: GeneratedComponent = {
       id: Date.now().toString(),
-      code: updatedCode,
+      code: codeToUse,
       timestamp: new Date(),
       prompt: prompt,
     };
@@ -125,7 +126,7 @@ export default function App() {
     <div className="min-h-screen bg-linear-to-br dark:from-slate-900 dark:to-slate-800 from-slate-50 to-slate-100  ">
       {/* Header */}
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-screen-2xl mx-auto px-6 py-4">
+        <div className="mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-linear-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
