@@ -182,7 +182,7 @@ export default function App() {
             <div className="lg:col-span-6">
               <SandpackProvider template="react-ts" options={{
                 externalResources: ["https://cdn.tailwindcss.com"],
-              }} files={sandpackFiles}>
+              }} files={sandpackFiles} theme={isDarkMode ? "dark" : "light"}>
                 <ComponentPreview code={currentComponent.code} />
                 <CodeViewer onCodeChanged={setUpdatedCode} />
               </SandpackProvider>
