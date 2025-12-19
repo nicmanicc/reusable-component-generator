@@ -3,16 +3,14 @@
 import OpenAI from "openai";
 const client = new OpenAI();
 
-export const generateComponent = async (prompt: string) => {
-  // Call OpenAI or another AI service to generate component code based on the prompt
-  // This is a placeholder implementation
+export const generateComponent = async (promptInput: string) => {
   const response = await client.responses.create({
     model: "gpt-5-mini",
     prompt: {
-      id: "pmpt_69453dcc610c8195ab57de3cff412814036eeb25300a030b",
-      version: "1",
+      id: "pmpt_694552ca937c8196aad1c80dd2973db2045fb08fa22f3415",
+      version: "2",
     },
-    input: prompt,
+    input: promptInput,
   });
   return response.output_text;
 };
