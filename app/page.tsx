@@ -11,6 +11,7 @@ import {
   SandpackProvider,
 } from "@codesandbox/sandpack-react";
 import type { SandpackFiles } from '@codesandbox/sandpack-react';
+import { generateComponent } from './actions/generateComponent';
 export interface GeneratedComponent {
   id: string;
   code: string;
@@ -24,16 +25,6 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
-const mockComponent = `export default function Button({ label = 'Click me', onClick }: { label?: string; onClick?: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
-    >
-      {label}
-    </button>
-  );
-}`
 
 export default function App() {
   const [currentComponent, setCurrentComponent] = useState<GeneratedComponent | null>(null);
@@ -58,6 +49,7 @@ export default function App() {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     }
+
   }, []);
 
   const toggleDarkMode = () => {
@@ -77,7 +69,6 @@ export default function App() {
   const handleGenerate = async (prompt: string, isRefinement: boolean = false) => {
     setIsGenerating(true);
 
-    // Add user message to chat
     const userMessage: ChatMessage = {
       role: 'user',
       content: prompt,
@@ -85,11 +76,13 @@ export default function App() {
     };
     setChatMessages(prev => [...prev, userMessage]);
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    // Call the AI service to get the generated/updated component code
-    // For demo purposes, Im using mockComponent or updatedCode
-    const codeToUse = isRefinement && currentComponent ? updatedCode : mockComponent;
+    const response = isRefinement ? await generateComponent(prompt, updatedCode) : await generateComponent(prompt);
+    var codeToUse = response;
+
+    if (response === "Input cannot be interpreted" && !isRefinement) {
+      codeToUse = "<div className=\"p-4 text-gray-500 text-center\">Component placeholder — unclear input</div>";
+    }
+
     const newComponent: GeneratedComponent = {
       id: Date.now().toString(),
       code: codeToUse,
@@ -97,7 +90,6 @@ export default function App() {
       prompt: prompt,
     };
 
-    // Add assistant message to chat
     const assistantMessage: ChatMessage = {
       role: 'assistant',
       content: isRefinement
