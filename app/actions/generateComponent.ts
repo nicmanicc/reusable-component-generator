@@ -8,7 +8,7 @@ export const generateComponent = async (promptInput: string, code?: string) => {
     model: "gpt-5-mini",
     prompt: {
       id: "pmpt_694552ca937c8196aad1c80dd2973db2045fb08fa22f3415",
-      version: "3",
+      version: "7",
     },
     input: promptInput + " Here is the existing code to refine: " + code,
   });
