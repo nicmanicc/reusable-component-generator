@@ -33,6 +33,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [updatedCode, setUpdatedCode] = useState<string>('');
+  const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>([]);
 
   const sandpackFiles: SandpackFiles | undefined = useMemo(
     () =>
@@ -102,7 +103,7 @@ export default function App() {
     };
 
 
-
+    setRefinementSuggestions(response.actions || []);
     setCurrentComponent(newComponent);
     setHistory(prev => [...prev, newComponent]);
     setChatMessages(prev => [...prev, assistantMessage]);
@@ -193,6 +194,7 @@ export default function App() {
                 messages={chatMessages}
                 onSendMessage={(message) => handleGenerate(message, true)}
                 isGenerating={isGenerating}
+                refinementSuggestions={refinementSuggestions}
               />
             </div>
           </div>
