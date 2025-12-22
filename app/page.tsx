@@ -76,27 +76,32 @@ export default function App() {
     };
     setChatMessages(prev => [...prev, userMessage]);
 
-    const response = isRefinement ? await generateComponent(prompt, updatedCode) : await generateComponent(prompt);
-    var codeToUse = response;
+    const response = JSON.parse(isRefinement ? await generateComponent(prompt, updatedCode) : await generateComponent(prompt));
 
-    if (response === "Input cannot be interpreted" && !isRefinement) {
-      codeToUse = "<div className=\"p-4 text-gray-500 text-center\">Component placeholder — unclear input</div>";
-    }
-
-    const newComponent: GeneratedComponent = {
-      id: Date.now().toString(),
-      code: codeToUse,
-      timestamp: new Date(),
-      prompt: prompt,
-    };
-
-    const assistantMessage: ChatMessage = {
+    var refinedComponent = response.code;
+    var assistantMessage: ChatMessage = {
       role: 'assistant',
       content: isRefinement
         ? `I've updated the component based on your request: "${prompt}"`
         : `I've generated a new component based on your prompt: "${prompt}"`,
       timestamp: new Date(),
+    }
+    if (!response.changed) {
+      assistantMessage = {
+        role: 'assistant',
+        content: `The requested changes could not be applied. Here's the original component code.`,
+        timestamp: new Date(),
+      }
+    }
+
+    const newComponent: GeneratedComponent = {
+      id: Date.now().toString(),
+      code: refinedComponent,
+      timestamp: new Date(),
+      prompt: prompt,
     };
+
+
 
     setCurrentComponent(newComponent);
     setHistory(prev => [...prev, newComponent]);
