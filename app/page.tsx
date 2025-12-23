@@ -6,12 +6,14 @@ import { CodeViewer } from './components/CodeViewer';
 import { ComponentPreview } from './components/ComponentPreview';
 import { ChatInterface } from './components/ChatInterface';
 import { HistoryPanel } from './components/HistoryPanel';
-import { Sparkles, Moon, Sun } from 'lucide-react';
+import { Sparkles, Moon, Sun, LogOut } from 'lucide-react';
 import {
   SandpackProvider,
 } from "@codesandbox/sandpack-react";
 import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from './actions/generateComponent';
+import { signout } from '@/lib/auth-actions';
+import { createClient } from "@/utils/supabase/client";
 export interface GeneratedComponent {
   id: string;
   code: string;
@@ -34,6 +36,20 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [updatedCode, setUpdatedCode] = useState<string>('');
   const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>([]);
+  const [user, setUser] = useState<any>(null);
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+      console.log("Fetched user:", user);
+    };
+    fetchUser();
+  }, []);
 
   const sandpackFiles: SandpackFiles | undefined = useMemo(
     () =>
@@ -143,6 +159,19 @@ export default function App() {
               >
                 {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
+              <div className="flex items-center gap-3 pl-3 border-l border-slate-300 dark:border-slate-600">
+                <div className="text-right">
+                  <p className="text-sm text-slate-900 dark:text-white">{user?.name || user?.identities[0].identity_data.full_name}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+                </div>
+                <button
+                  onClick={() => signout()}
+                  className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  title="Sign out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
               {history.length > 0 && (
                 <button
                   onClick={handleClear}
