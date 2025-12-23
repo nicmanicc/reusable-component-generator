@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Sparkles, Mail, Lock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { signInWithGoogle } from '@/lib/auth-actions';
+import { signInWithGoogle, signInWithGithub } from '@/lib/auth-actions';
 
 interface SignInProps {
   onSignIn: (email: string, password: string) => void;
@@ -137,6 +137,7 @@ export default function SignIn({ onSignIn, darkMode }: SignInProps) {
               <span className="text-sm">Google</span>
             </button>
             <button
+              onClick={() => signInWithGithub()}
               type="button"
               className="px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300"
             >
