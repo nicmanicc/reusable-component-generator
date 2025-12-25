@@ -5,26 +5,33 @@ import { Sparkles, Mail, Lock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { AuthProviderSignIn } from '../components/AuthProviderSignIn';
 import { signInWithGoogle, signInWithGithub } from '@/lib/auth-actions';
+import { login } from '@/lib/auth-actions';
+import { authErrorMessageFromCode } from '@/lib/auth/errors';
+import { useRouter } from 'next/navigation';
 
-interface SignInProps {
-  onSignIn: (email: string, password: string) => void;
-  darkMode: boolean;
-}
 
-export default function SignIn({ onSignIn, darkMode }: SignInProps) {
+
+export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    onSignIn(email, password);
+    const formData = new FormData(e.currentTarget)
+    const response = await login(formData);
+    if (response.error.code) {
+      setError(authErrorMessageFromCode(response.error.code) ?? 'Unable to sign in.');
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(false);
+    router.push('/');
   };
 
   return (
@@ -51,6 +58,7 @@ export default function SignIn({ onSignIn, darkMode }: SignInProps) {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -70,6 +78,7 @@ export default function SignIn({ onSignIn, darkMode }: SignInProps) {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                 <input
                   id="password"
+                  name="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -79,6 +88,13 @@ export default function SignIn({ onSignIn, darkMode }: SignInProps) {
                 />
               </div>
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
 
             {/* Forgot Password Link */}
             <div className="flex items-center justify-end">

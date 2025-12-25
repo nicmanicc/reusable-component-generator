@@ -1,56 +1,65 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
 import { createClient } from "@/utils/supabase/server";
+import { getSupabaseAuthErrorCode } from "@/lib/auth/errors";
+import {
+  LoginInputSchema,
+  SignupInputSchema,
+  LoginInput,
+  SignupInput,
+} from "@/lib/auth/schemas";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
+  const parsed = LoginInputSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
+  if (!parsed.success) {
+    return { error: { code: "ParseError" } };
+  }
 
+  const data: LoginInput = parsed.data;
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    redirect("/error");
+    return { error: { code: getSupabaseAuthErrorCode(error) } };
   }
 
-  revalidatePath("/", "layout");
-  redirect("/");
+  return { error: { code: null } };
 }
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const firstName = formData.get("first-name") as string;
-  const lastName = formData.get("last-name") as string;
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    options: {
-      data: {
-        full_name: `${firstName + " " + lastName}`,
-        email: formData.get("email") as string,
-      },
-    },
-  };
+  const parsed = SignupInputSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
 
-  const { error } = await supabase.auth.signUp(data);
-
-  if (error) {
-    redirect("/error");
+  if (!parsed.success) {
+    return { error: { code: "ParseError" } };
   }
 
-  revalidatePath("/", "layout");
-  redirect("/");
+  const { name, email, password } = parsed.data as SignupInput;
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: name,
+      },
+    },
+  });
+
+  if (error) {
+    return { error: { code: getSupabaseAuthErrorCode(error) } };
+  }
+  return { error: { code: null } };
 }
 
 export async function signout() {

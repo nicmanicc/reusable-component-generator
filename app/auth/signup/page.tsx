@@ -5,13 +5,11 @@ import { Sparkles, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { AuthProviderSignIn } from '../components/AuthProviderSignIn';
 import { signInWithGoogle, signInWithGithub } from '@/lib/auth-actions';
+import { signup } from '@/lib/auth-actions';
+import { useRouter } from 'next/navigation';
+import { authErrorMessageFromCode } from '@/lib/auth/errors';
 
-interface SignUpProps {
-  onSignUp: (name: string, email: string, password: string) => void;
-  darkMode: boolean;
-}
-
-export default function SignUp({ onSignUp, darkMode }: SignUpProps) {
+export default function SignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,17 +17,17 @@ export default function SignUp({ onSignUp, darkMode }: SignUpProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    // Validate password length
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
@@ -37,10 +35,16 @@ export default function SignUp({ onSignUp, darkMode }: SignUpProps) {
 
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const formData = new FormData(e.currentTarget);
 
-    onSignUp(name, email, password);
+    const response = await signup(formData);
+    if (response.error.code) {
+      setError(authErrorMessageFromCode(response.error.code) ?? 'Unable to create account.');
+      setIsLoading(false);
+      return;
+    }
+
+    router.push('/');
     setIsLoading(false);
   };
 
@@ -68,6 +72,7 @@ export default function SignUp({ onSignUp, darkMode }: SignUpProps) {
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                 <input
                   id="name"
+                  name="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -87,6 +92,7 @@ export default function SignUp({ onSignUp, darkMode }: SignUpProps) {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -106,6 +112,7 @@ export default function SignUp({ onSignUp, darkMode }: SignUpProps) {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                 <input
                   id="password"
+                  name="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -125,6 +132,7 @@ export default function SignUp({ onSignUp, darkMode }: SignUpProps) {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500" />
                 <input
                   id="confirmPassword"
+                  name="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -141,26 +149,6 @@ export default function SignUp({ onSignUp, darkMode }: SignUpProps) {
                 <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
             )}
-
-            {/* Terms */}
-            <div className="flex items-start gap-3">
-              <input
-                id="terms"
-                type="checkbox"
-                className="mt-1 w-4 h-4 text-indigo-600 border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-indigo-500"
-                required
-              />
-              <label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-400">
-                I agree to the{' '}
-                <button type="button" className="text-indigo-600 dark:text-indigo-400 hover:underline">
-                  Terms of Service
-                </button>{' '}
-                and{' '}
-                <button type="button" className="text-indigo-600 dark:text-indigo-400 hover:underline">
-                  Privacy Policy
-                </button>
-              </label>
-            </div>
 
             {/* Submit Button */}
             <button
