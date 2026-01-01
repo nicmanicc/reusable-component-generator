@@ -1,4 +1,4 @@
-import { prisma } from "@/utils/prisma/client";
+import { prisma } from '@/utils/prisma/client';
 /* id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id            String               @db.Uuid
   title              String
@@ -17,6 +17,14 @@ export async function createProject(
       user_id: user_id,
       title: name,
       description: description,
+    },
+  });
+}
+
+export async function deleteProject(project_id: string) {
+  return prisma.projects.delete({
+    where: {
+      id: project_id,
     },
   });
 }
