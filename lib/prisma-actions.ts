@@ -1,4 +1,4 @@
-import { prisma } from '@/utils/prisma/client';
+import { prisma } from "@/utils/prisma/client";
 /* id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id            String               @db.Uuid
   title              String
@@ -25,6 +25,29 @@ export async function deleteProject(project_id: string) {
   return prisma.projects.delete({
     where: {
       id: project_id,
+    },
+  });
+}
+
+/*  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id     String    @db.Uuid
+  version_number Int
+  prompt         String
+  generated_code String
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  projects       projects  @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction) */
+export async function createComponentVersion(
+  project_id: string,
+  version_number: number,
+  generated_code: string,
+  prompt: string
+) {
+  return prisma.component_versions.create({
+    data: {
+      project_id: project_id,
+      version_number: version_number,
+      generated_code: generated_code,
+      prompt: prompt,
     },
   });
 }
