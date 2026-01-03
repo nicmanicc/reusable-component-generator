@@ -1,3 +1,4 @@
+"use server";
 import { prisma } from "@/utils/prisma/client";
 /* id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id            String               @db.Uuid
