@@ -14,8 +14,7 @@ import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from './actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
-import { createComponentVersion } from '@/lib/prisma-actions';
-import { create } from 'domain';
+import { createComponentVersion, getProject } from '@/lib/prisma-actions';
 export interface GeneratedComponent {
   id: string;
   code: string;
@@ -120,13 +119,12 @@ export default function App() {
       prompt: prompt,
     };
 
-    const comp = await createComponentVersion(
+    await createComponentVersion(
       "a80da193-0e73-4be7-8239-70802803a35c", // Placeholder project_id
       history.length + 1,
       newComponent.code,
       prompt
     );
-
 
     setRefinementSuggestions(response.actions || []);
     setCurrentComponent(newComponent);
