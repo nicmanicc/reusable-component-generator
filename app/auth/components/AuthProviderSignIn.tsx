@@ -1,5 +1,3 @@
-import { signInWithGoogle } from '@/lib/auth-actions';
-
 interface AuthProviderSignInProps {
   AuthProviderFunc: () => void;
   AuthProviderName: string;

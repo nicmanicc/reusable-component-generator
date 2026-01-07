@@ -1,6 +1,5 @@
 import { Eye } from 'lucide-react';
 import {
-  SandpackProvider,
   SandpackLayout,
   SandpackPreview,
 } from "@codesandbox/sandpack-react";
