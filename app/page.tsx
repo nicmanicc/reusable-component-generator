@@ -5,7 +5,6 @@ import { ComponentGenerator } from './components/ComponentGenerator';
 import { CodeViewer } from './components/CodeViewer';
 import { ComponentPreview } from './components/ComponentPreview';
 import { ChatInterface } from './components/ChatInterface';
-import { HistoryPanel } from './components/HistoryPanel';
 import { Sparkles, Moon, Sun, LogOut } from 'lucide-react';
 import {
   SandpackProvider,
@@ -15,8 +14,10 @@ import { generateComponent } from './actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
 import { createComponentVersion, getProject } from '@/lib/prisma-actions';
+import { Project, Component, TreeSidebar, Version } from './components/TreeSideBar';
 export interface GeneratedComponent {
   id: string;
+  componentId: string;
   code: string;
   timestamp: Date;
   prompt: string;
@@ -31,7 +32,89 @@ export interface ChatMessage {
 
 export default function App() {
   const [currentComponent, setCurrentComponent] = useState<GeneratedComponent | null>(null);
-  const [history, setHistory] = useState<GeneratedComponent[]>([]);
+
+  // Project/Component state
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [components, setComponents] = useState<Component[]>([]);
+  const [versions, setVersions] = useState<GeneratedComponent[]>([]);
+
+  // Selection state
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
+  const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
+
+  // Project handlers
+  const handleCreateProject = (name: string) => {
+    const newProject: Project = {
+      id: Date.now().toString(),
+      name,
+      createdAt: new Date(),
+    };
+    setProjects(prev => [...prev, newProject]);
+    setSelectedProjectId(newProject.id);
+  };
+
+  const handleSelectProject = (projectId: string) => {
+    setSelectedProjectId(projectId);
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    setProjects(prev => prev.filter(p => p.id !== projectId));
+    setComponents(prev => prev.filter(c => c.projectId !== projectId));
+
+    if (selectedProjectId === projectId) {
+      setSelectedProjectId(null);
+      setSelectedComponentId(null);
+      setCurrentVersionId(null);
+      setChatMessages([]);
+    }
+  };
+
+  // Component handlers
+  const handleCreateComponent = (name: string) => {
+    if (!selectedProjectId) return;
+
+    const newComponent: Component = {
+      id: Date.now().toString(),
+      projectId: selectedProjectId,
+      name,
+      createdAt: new Date(),
+    };
+    setComponents(prev => [...prev, newComponent]);
+    setSelectedComponentId(newComponent.id);
+    setCurrentVersionId(null);
+    setChatMessages([]);
+  };
+
+  const handleSelectComponent = (componentId: string) => {
+    setSelectedComponentId(componentId);
+    setChatMessages([]);
+
+    // Load the latest version for this component
+    const componentVersions = versions.filter(v => v.componentId === componentId);
+    if (componentVersions.length > 0) {
+      const latestVersion = componentVersions[componentVersions.length - 1];
+      setCurrentVersionId(latestVersion.id);
+    } else {
+      setCurrentVersionId(null);
+    }
+  };
+
+  const handleDeleteComponent = (componentId: string) => {
+    setComponents(prev => prev.filter(c => c.id !== componentId));
+    setVersions(prev => prev.filter(v => v.componentId !== componentId));
+
+    if (selectedComponentId === componentId) {
+      setSelectedComponentId(null);
+      setCurrentVersionId(null);
+      setChatMessages([]);
+    }
+  };
+
+  const handleSelectVersion = (versionId: string) => {
+    setCurrentVersionId(versionId);
+  };
+
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -47,21 +130,13 @@ export default function App() {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
-      console.log("Fetched user:", user);
     };
     fetchUser();
   }, []);
 
-  const sandpackFiles: SandpackFiles | undefined = useMemo(
-    () =>
-      currentComponent
-        ? { "/App.tsx": currentComponent.code }
-        : undefined,
-    [currentComponent?.id, currentComponent?.code]
-  );
+
 
   useEffect(() => {
-    // Check for saved dark mode preference
     const savedMode = localStorage.getItem('darkMode');
     if (savedMode === 'true') {
       setIsDarkMode(true);
@@ -114,6 +189,7 @@ export default function App() {
 
     const newComponent: GeneratedComponent = {
       id: Date.now().toString(),
+      componentId: selectedComponentId || 'default',
       code: refinedComponent,
       timestamp: new Date(),
       prompt: prompt,
@@ -121,27 +197,39 @@ export default function App() {
 
     await createComponentVersion(
       "a80da193-0e73-4be7-8239-70802803a35c", // Placeholder project_id
-      history.length + 1,
+      versions.length + 1,
       newComponent.code,
       prompt
     );
 
     setRefinementSuggestions(response.actions || []);
-    setCurrentComponent(newComponent);
-    setHistory(prev => [...prev, newComponent]);
+    setVersions(prev => [...prev, newComponent]);
+    setCurrentVersionId(newComponent.id);
     setChatMessages(prev => [...prev, assistantMessage]);
     setIsGenerating(false);
   };
 
-  const handleRevert = (component: GeneratedComponent) => {
-    setCurrentComponent(component);
-  };
+  const currentVersion = currentVersionId
+    ? versions.find(v => v.id === currentVersionId)
+    : null;
 
-  const handleClear = () => {
-    setCurrentComponent(null);
-    setHistory([]);
-    setChatMessages([]);
-  };
+  const sidebarVersions: Version[] = versions.map(v => ({
+    id: v.id,
+    componentId: v.componentId,
+    prompt: v.prompt,
+    timestamp: v.timestamp,
+  }));
+
+  const sandpackFiles: SandpackFiles | undefined = useMemo(
+    () =>
+      currentVersion
+        ? {
+          "/App.tsx": currentVersion
+            .code
+        }
+        : undefined,
+    [currentVersion?.id, currentVersion?.code]
+  );
 
   return (
     <div className="min-h-screen bg-linear-to-br dark:from-slate-900 dark:to-slate-800 from-slate-50 to-slate-100  ">
@@ -179,63 +267,85 @@ export default function App() {
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>
-              {history.length > 0 && (
-                <button
-                  onClick={handleClear}
-                  className="px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                >
-                  Clear All
-                </button>
-              )}
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-screen-2xl mx-auto px-6 py-8">
-        {!currentComponent ? (
-          /* Initial State - Prompt Input */
-          <div className="max-w-3xl mx-auto">
-            <ComponentGenerator
-              onGenerate={(prompt) => handleGenerate(prompt, false)}
-              isGenerating={isGenerating}
-            />
+
+      {/* Main Workspace - Split View */}
+      <div className="flex-1 flex overflow-hidden">
+
+        {/* Left Sidebar - History */}
+        <div className="w-64 h-[calc(100vh-5rem)] shrink-0">
+          <TreeSidebar
+            projects={projects}
+            components={components}
+            versions={sidebarVersions}
+            selectedProjectId={selectedProjectId}
+            selectedComponentId={selectedComponentId}
+            selectedVersionId={currentVersionId}
+            onSelectProject={handleSelectProject}
+            onSelectComponent={handleSelectComponent}
+            onSelectVersion={handleSelectVersion}
+            onCreateProject={handleCreateProject}
+            onCreateComponent={handleCreateComponent}
+            onDeleteProject={handleDeleteProject}
+            onDeleteComponent={handleDeleteComponent}
+            darkMode={isDarkMode}
+          />
+        </div>
+
+        {/* Center - Preview & Code */}
+        <div className="flex-1 overflow-auto">
+          <div className="p-6">
+            {!currentVersion ? (
+              /* Initial State - Show prompt */
+              <div className="max-w-3xl mx-auto">
+                {selectedComponentId ? (
+                  <ComponentGenerator
+                    onGenerate={(prompt) => handleGenerate(prompt, false)}
+                    isGenerating={isGenerating}
+                  />
+                ) : (
+                  <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-12 text-center">
+                    <Sparkles className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+                    <h2 className="text-slate-900 dark:text-white mb-2">Get Started</h2>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      {!selectedProjectId
+                        ? 'Create or select a project to begin'
+                        : 'Create or select a component to start generating'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                <div className="lg:col-span-2 space-y-6">
+                  <SandpackProvider template="react-ts" options={{
+                    externalResources: ["https://cdn.tailwindcss.com"],
+                  }} files={sandpackFiles} theme={isDarkMode ? "dark" : "light"}>
+                    <ComponentPreview code={currentVersion.code} />
+                    <CodeViewer onCodeChanged={setUpdatedCode} />
+                  </SandpackProvider>
+
+                </div>
+
+                {/* Right Sidebar - Chat Refinement */}
+                <div className="lg:col-span-1">
+                  <ChatInterface
+                    messages={chatMessages}
+                    onSendMessage={(message) => handleGenerate(message, true)}
+                    isGenerating={isGenerating}
+                    refinementSuggestions={refinementSuggestions}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        ) : (
-          /* Main Workspace - Split View */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Sidebar - History */}
-            <div className="lg:col-span-3">
-              <HistoryPanel
-                history={history}
-                currentId={currentComponent.id}
-                onRevert={handleRevert}
-              />
-            </div>
-
-            {/* Center - Preview & Code */}
-            <div className="lg:col-span-6">
-              <SandpackProvider template="react-ts" options={{
-                externalResources: ["https://cdn.tailwindcss.com"],
-              }} files={sandpackFiles} theme={isDarkMode ? "dark" : "light"}>
-                <ComponentPreview code={currentComponent.code} />
-                <CodeViewer onCodeChanged={setUpdatedCode} />
-              </SandpackProvider>
-
-            </div>
-
-            {/* Right Sidebar - Chat Refinement */}
-            <div className="lg:col-span-3">
-              <ChatInterface
-                messages={chatMessages}
-                onSendMessage={(message) => handleGenerate(message, true)}
-                isGenerating={isGenerating}
-                refinementSuggestions={refinementSuggestions}
-              />
-            </div>
-          </div>
-        )}
+        </div>
       </div>
+
     </div>
   );
 }

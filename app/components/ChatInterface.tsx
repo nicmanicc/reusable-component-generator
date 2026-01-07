@@ -32,7 +32,7 @@ export function ChatInterface({ messages, onSendMessage, isGenerating, refinemen
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col h-[calc(100vh-12rem)] sticky top-24">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col h-full sticky top-24">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
         <div className="flex items-center gap-2">
