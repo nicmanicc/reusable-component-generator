@@ -31,8 +31,6 @@ export interface ChatMessage {
 
 
 export default function App() {
-  const [currentComponent, setCurrentComponent] = useState<GeneratedComponent | null>(null);
-
   // Project/Component state
   const [projects, setProjects] = useState<Project[]>([]);
   const [components, setComponents] = useState<Component[]>([]);
