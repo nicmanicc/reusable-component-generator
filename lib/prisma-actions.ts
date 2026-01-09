@@ -30,6 +30,10 @@ export async function getProject(user_id: string) {
     orderBy: {
       created_at: "desc",
     },
+    include: {
+      component_versions: true,
+      chat_messages: true,
+    },
   });
 }
 
