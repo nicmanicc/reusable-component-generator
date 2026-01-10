@@ -16,7 +16,7 @@ import {
 export interface Project {
   id: string;
   name: string;
-  createdAt: Date;
+  createdAt: Date | null;
 }
 
 export interface Component {

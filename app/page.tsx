@@ -41,6 +41,14 @@ export default function App() {
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
   const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
 
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [updatedCode, setUpdatedCode] = useState<string>('');
+  const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>([]);
+  const [user, setUser] = useState<any>(null);
+
+
   // Project handlers
   const handleCreateProject = (name: string) => {
     const newProject: Project = {
@@ -113,12 +121,6 @@ export default function App() {
     setCurrentVersionId(versionId);
   };
 
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [updatedCode, setUpdatedCode] = useState<string>('');
-  const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>([]);
-  const [user, setUser] = useState<any>(null);
 
   const supabase = createClient();
 
@@ -132,6 +134,17 @@ export default function App() {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    getProject(user.id).then((projects) => {
+      const projectData: Project[] = projects.map((proj) => ({
+        id: proj.id,
+        name: proj.title,
+        createdAt: proj.created_at,
+      }));
+      setProjects(projectData);
+    });
+  }, [user]);
 
 
   useEffect(() => {
