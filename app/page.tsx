@@ -13,7 +13,7 @@ import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from './actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
-import { createComponentVersion, getProject } from '@/lib/prisma-actions';
+import { createComponent, getProject } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from './components/TreeSideBar';
 export interface GeneratedComponent {
   id: string;
@@ -77,7 +77,7 @@ export default function App() {
   };
 
   // Component handlers
-  const handleCreateComponent = (name: string) => {
+  const handleCreateComponent = async (name: string) => {
     if (!selectedProjectId) return;
 
     const newComponent: Component = {
@@ -86,6 +86,9 @@ export default function App() {
       name,
       createdAt: new Date(),
     };
+
+    await createComponent(selectedProjectId, name);
+
     setComponents(prev => [...prev, newComponent]);
     setSelectedComponentId(newComponent.id);
     setCurrentVersionId(null);
@@ -206,12 +209,6 @@ export default function App() {
       prompt: prompt,
     };
 
-    await createComponentVersion(
-      "a80da193-0e73-4be7-8239-70802803a35c", // Placeholder project_id
-      versions.length + 1,
-      newComponent.code,
-      prompt
-    );
 
     setRefinementSuggestions(response.actions || []);
     setVersions(prev => [...prev, newComponent]);

@@ -31,7 +31,6 @@ export async function getProject(user_id: string) {
       created_at: "desc",
     },
     include: {
-      component_versions: true,
       chat_messages: true,
     },
   });
@@ -46,24 +45,16 @@ export async function deleteProject(project_id: string) {
 }
 
 /*  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  project_id     String    @db.Uuid
   version_number Int
   prompt         String
   generated_code String
   created_at     DateTime? @default(now()) @db.Timestamptz(6)
   projects       projects  @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction) */
-export async function createComponentVersion(
-  project_id: string,
-  version_number: number,
-  generated_code: string,
-  prompt: string
-) {
-  return prisma.component_versions.create({
+export async function createComponent(project_id: string, title: string) {
+  return prisma.project_components.create({
     data: {
       project_id: project_id,
-      version_number: version_number,
-      generated_code: generated_code,
-      prompt: prompt,
+      title: title,
     },
   });
 }
