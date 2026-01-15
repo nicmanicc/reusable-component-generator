@@ -8,16 +8,11 @@ import { prisma } from "@/utils/prisma/client";
   chat_messages      chat_messages[]
   component_versions component_versions[]
   users   */
-export async function createProject(
-  user_id: string,
-  name: string,
-  description: string
-) {
+export async function createProject(user_id: string, name: string) {
   return prisma.projects.create({
     data: {
       user_id: user_id,
       title: name,
-      description: description,
     },
   });
 }

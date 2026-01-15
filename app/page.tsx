@@ -13,9 +13,8 @@ import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from './actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
-import { createComponent, getProject } from '@/lib/prisma-actions';
+import { createComponent, getProject, createProject, deleteProject } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from './components/TreeSideBar';
-import { set } from 'zod';
 export interface GeneratedComponent {
   id: string;
   componentId: string;
@@ -51,9 +50,11 @@ export default function App() {
 
 
   // Project handlers
-  const handleCreateProject = (name: string) => {
+  const handleCreateProject = async (name: string) => {
+    const newProjectFromDB = await createProject(user.id, name);
+
     const newProject: Project = {
-      id: Date.now().toString(),
+      id: newProjectFromDB.id,
       name,
       createdAt: new Date(),
     };
@@ -65,7 +66,8 @@ export default function App() {
     setSelectedProjectId(projectId);
   };
 
-  const handleDeleteProject = (projectId: string) => {
+  const handleDeleteProject = async (projectId: string) => {
+    await deleteProject(projectId);
     setProjects(prev => prev.filter(p => p.id !== projectId));
     setComponents(prev => prev.filter(c => c.projectId !== projectId));
 
