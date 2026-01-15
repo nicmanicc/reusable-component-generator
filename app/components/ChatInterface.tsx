@@ -73,26 +73,32 @@ export function ChatInterface({ messages, onSendMessage, isGenerating, refinemen
             </div>
           ))
         )}
-        <div className="text-center space-y-4 py-8">
-          <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center mx-auto">
-            <MessageSquare className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs text-slate-400 dark:text-slate-500">Quick actions:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {refinementSuggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => setInput(suggestion)}
-                  disabled={isGenerating}
-                  className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {suggestion}
-                </button>
-              ))}
+
+        {
+          refinementSuggestions.length > 0 &&
+          <div className="text-center space-y-4 py-8">
+            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center mx-auto">
+              <MessageSquare className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs text-slate-400 dark:text-slate-500">Quick actions:</p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {refinementSuggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setInput(suggestion)}
+                    disabled={isGenerating}
+                    className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+
+        }
+
         <div ref={messagesEndRef} />
       </div>
 
