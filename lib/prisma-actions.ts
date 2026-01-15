@@ -1,13 +1,6 @@
 "use server";
 import { prisma } from "@/utils/prisma/client";
-/* id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id            String               @db.Uuid
-  title              String
-  description        String?
-  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
-  chat_messages      chat_messages[]
-  component_versions component_versions[]
-  users   */
+
 export async function createProject(user_id: string, name: string) {
   return prisma.projects.create({
     data: {
@@ -44,12 +37,6 @@ export async function deleteProject(project_id: string) {
   });
 }
 
-/*  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  version_number Int
-  prompt         String
-  generated_code String
-  created_at     DateTime? @default(now()) @db.Timestamptz(6)
-  projects       projects  @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction) */
 export async function createComponent(project_id: string, title: string) {
   return prisma.project_components.create({
     data: {
@@ -63,6 +50,34 @@ export async function deleteComponent(component_id: string) {
   return prisma.project_components.delete({
     where: {
       id: component_id,
+    },
+  });
+}
+
+/*model component_versions {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  component_id       String             @db.Uuid
+  version_number     Int
+  prompt             String
+  generated_code     String
+  created_at         DateTime?          @default(now()) @db.Timestamptz(6)
+  project_components project_components @relation(fields: [component_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}*/
+
+export async function createVersion(
+  component_id: string,
+  version_number: number,
+  prompt: string,
+  generated_code: string
+) {
+  return prisma.component_versions.create({
+    data: {
+      component_id: component_id,
+      version_number: version_number,
+      prompt: prompt,
+      generated_code: generated_code,
     },
   });
 }

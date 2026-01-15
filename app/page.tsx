@@ -13,7 +13,7 @@ import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from './actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
-import { createComponent, getProject, createProject, deleteProject, deleteComponent } from '@/lib/prisma-actions';
+import { createComponent, getProject, createProject, deleteProject, deleteComponent, createVersion } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from './components/TreeSideBar';
 export interface GeneratedComponent {
   id: string;
@@ -159,8 +159,22 @@ export default function App() {
           createdAt: pc.created_at as Date,
         }))
       );
-      setComponents(allComponents);
+
+      const allVersions: GeneratedComponent[] = projects.flatMap(proj =>
+        proj.project_components.flatMap(pc =>
+          pc.component_versions.map(cv => ({
+            id: cv.id,
+            componentId: pc.id,
+            code: cv.generated_code,
+            timestamp: cv.created_at as Date,
+            prompt: cv.prompt,
+          }))
+        )
+      );
       setProjects(projectData);
+      setComponents(allComponents);
+      setVersions(allVersions);
+
     });
   }, [user]);
 
@@ -214,20 +228,26 @@ export default function App() {
         content: `The requested changes could not be applied. Here's the original component code.`,
         timestamp: new Date(),
       }
+    } else {
+      console.log(selectedComponentId, versions.length);
+      const version = await createVersion(selectedComponentId as string, versions.length + 1, prompt, refinedComponent);
+
+      const newComponent: GeneratedComponent = {
+        id: version.id,
+        componentId: selectedComponentId as string,
+        code: refinedComponent,
+        timestamp: new Date(),
+        prompt: prompt,
+      };
+      setVersions(prev => [...prev, newComponent]);
+      setCurrentVersionId(newComponent.id);
+      setRefinementSuggestions(response.actions || []);
+
     }
 
-    const newComponent: GeneratedComponent = {
-      id: Date.now().toString(),
-      componentId: selectedComponentId || 'default',
-      code: refinedComponent,
-      timestamp: new Date(),
-      prompt: prompt,
-    };
 
 
-    setRefinementSuggestions(response.actions || []);
-    setVersions(prev => [...prev, newComponent]);
-    setCurrentVersionId(newComponent.id);
+
     setChatMessages(prev => [...prev, assistantMessage]);
     setIsGenerating(false);
   };
