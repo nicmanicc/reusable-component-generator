@@ -126,6 +126,7 @@ export default function App() {
   };
 
   const handleSelectVersion = (versionId: string) => {
+    setSelectedComponentId(versions.find(v => v.id === versionId)?.componentId || null);
     setCurrentVersionId(versionId);
   };
 
