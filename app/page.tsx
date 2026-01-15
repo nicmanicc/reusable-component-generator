@@ -13,7 +13,7 @@ import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from './actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
-import { createComponent, getProject, createProject, deleteProject } from '@/lib/prisma-actions';
+import { createComponent, getProject, createProject, deleteProject, deleteComponent } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from './components/TreeSideBar';
 export interface GeneratedComponent {
   id: string;
@@ -113,7 +113,8 @@ export default function App() {
     }
   };
 
-  const handleDeleteComponent = (componentId: string) => {
+  const handleDeleteComponent = async (componentId: string) => {
+    await deleteComponent(componentId);
     setComponents(prev => prev.filter(c => c.id !== componentId));
     setVersions(prev => prev.filter(v => v.componentId !== componentId));
 

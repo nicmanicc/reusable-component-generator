@@ -58,3 +58,11 @@ export async function createComponent(project_id: string, title: string) {
     },
   });
 }
+
+export async function deleteComponent(component_id: string) {
+  return prisma.project_components.delete({
+    where: {
+      id: component_id,
+    },
+  });
+}
