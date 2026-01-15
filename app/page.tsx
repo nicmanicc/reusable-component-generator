@@ -231,7 +231,8 @@ export default function App() {
       }
     } else {
       console.log(selectedComponentId, versions.length);
-      const version = await createVersion(selectedComponentId as string, versions.length + 1, prompt, refinedComponent);
+      const versionLength = versions.filter(v => v.componentId === selectedComponentId).length;
+      const version = await createVersion(selectedComponentId as string, versionLength + 1, prompt, refinedComponent);
 
       const newComponent: GeneratedComponent = {
         id: version.id,
