@@ -32,6 +32,11 @@ export async function getProject(user_id: string) {
     },
     include: {
       chat_messages: true,
+      project_components: {
+        include: {
+          component_versions: true,
+        },
+      },
     },
   });
 }

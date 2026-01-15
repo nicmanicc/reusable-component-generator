@@ -15,6 +15,7 @@ import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
 import { createComponent, getProject } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from './components/TreeSideBar';
+import { set } from 'zod';
 export interface GeneratedComponent {
   id: string;
   componentId: string;
@@ -145,6 +146,16 @@ export default function App() {
         name: proj.title,
         createdAt: proj.created_at,
       }));
+
+      const allComponents: Component[] = projects.flatMap(proj =>
+        proj.project_components.map(pc => ({
+          id: pc.id,
+          projectId: proj.id,
+          name: pc.title,
+          createdAt: pc.created_at as Date,
+        }))
+      );
+      setComponents(allComponents);
       setProjects(projectData);
     });
   }, [user]);
