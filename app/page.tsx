@@ -82,15 +82,16 @@ export default function App() {
   // Component handlers
   const handleCreateComponent = async (name: string) => {
     if (!selectedProjectId) return;
+    const newComponentFromDB = await createComponent(selectedProjectId, name);
+
 
     const newComponent: Component = {
-      id: Date.now().toString(),
+      id: newComponentFromDB.id,
       projectId: selectedProjectId,
       name,
       createdAt: new Date(),
     };
 
-    await createComponent(selectedProjectId, name);
 
     setComponents(prev => [...prev, newComponent]);
     setSelectedComponentId(newComponent.id);
