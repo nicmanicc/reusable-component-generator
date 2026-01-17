@@ -19,7 +19,6 @@ export async function getProject(user_id: string) {
       created_at: "desc",
     },
     include: {
-      chat_messages: true,
       project_components: {
         include: {
           component_versions: true,
@@ -70,7 +69,7 @@ export async function createVersion(
   component_id: string,
   version_number: number,
   prompt: string,
-  generated_code: string
+  generated_code: string,
 ) {
   return prisma.component_versions.create({
     data: {
@@ -78,6 +77,31 @@ export async function createVersion(
       version_number: version_number,
       prompt: prompt,
       generated_code: generated_code,
+    },
+  });
+}
+
+export async function getChatMessages(component_id: string) {
+  return prisma.chat_messages.findMany({
+    where: {
+      component_id: component_id,
+    },
+    orderBy: {
+      created_at: "asc",
+    },
+  });
+}
+
+export async function createChatMessage(
+  component_id: string,
+  role: "user" | "assistant",
+  content: string,
+) {
+  return prisma.chat_messages.create({
+    data: {
+      component_id: component_id,
+      role: role,
+      content: content,
     },
   });
 }

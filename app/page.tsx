@@ -13,7 +13,7 @@ import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from './actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
-import { createComponent, getProject, createProject, deleteProject, deleteComponent, createVersion } from '@/lib/prisma-actions';
+import { createComponent, getProject, createProject, deleteProject, deleteComponent, createVersion, createChatMessage, getChatMessages } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from './components/TreeSideBar';
 export interface GeneratedComponent {
   id: string;
@@ -99,9 +99,17 @@ export default function App() {
     setChatMessages([]);
   };
 
-  const handleSelectComponent = (componentId: string) => {
+  const handleSelectComponent = async (componentId: string) => {
     setSelectedComponentId(componentId);
     setChatMessages([]);
+    await getChatMessages(componentId).then(messages => {
+      const formattedMessages: ChatMessage[] = messages.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+        timestamp: msg.created_at as Date,
+      }));
+      setChatMessages(formattedMessages);
+    });
 
     // Load the latest version for this component
     const componentVersions = versions.filter(v => v.componentId === componentId);
@@ -126,7 +134,7 @@ export default function App() {
   };
 
   const handleSelectVersion = (versionId: string) => {
-    setSelectedComponentId(versions.find(v => v.id === versionId)?.componentId || null);
+    handleSelectComponent(versions.find(v => v.id === versionId)?.componentId as string);
     setCurrentVersionId(versionId);
   };
 
@@ -212,6 +220,7 @@ export default function App() {
       timestamp: new Date(),
     };
     setChatMessages(prev => [...prev, userMessage]);
+    await createChatMessage(selectedComponentId as string, 'user', prompt);
 
     const response = JSON.parse(isRefinement ? await generateComponent(prompt, updatedCode) : await generateComponent(prompt));
 
@@ -244,10 +253,9 @@ export default function App() {
       setVersions(prev => [...prev, newComponent]);
       setCurrentVersionId(newComponent.id);
       setRefinementSuggestions(response.actions || []);
-
     }
 
-
+    await createChatMessage(selectedComponentId as string, 'assistant', assistantMessage.content);
 
 
     setChatMessages(prev => [...prev, assistantMessage]);
