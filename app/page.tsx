@@ -164,7 +164,7 @@ export default function App() {
       }));
 
       const allComponents: Component[] = projects.flatMap((proj) =>
-        proj.project_components.map((pc) => ({
+        proj.project_components.map((pc: ProjectWithRelations['project_components'][number]) => ({
           id: pc.id,
           projectId: proj.id,
           name: pc.title,
@@ -173,8 +173,8 @@ export default function App() {
       );
 
       const allVersions: GeneratedComponent[] = projects.flatMap((proj) =>
-        proj.project_components.flatMap((pc) =>
-          pc.component_versions.map((cv) => ({
+        proj.project_components.flatMap((pc: ProjectWithRelations['project_components'][number]) =>
+          pc.component_versions.map((cv: ProjectWithRelations['project_components'][number]['component_versions'][number]) => ({
             id: cv.id,
             componentId: pc.id,
             code: cv.generated_code,
