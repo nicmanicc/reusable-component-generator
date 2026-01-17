@@ -15,6 +15,9 @@ import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
 import { createComponent, getProject, createProject, deleteProject, deleteComponent, createVersion, createChatMessage, getChatMessages } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from './components/TreeSideBar';
+
+type ProjectWithRelations = Awaited<ReturnType<typeof getProject>>[number];
+type ChatMessageFromDB = Awaited<ReturnType<typeof getChatMessages>>[number];
 export interface GeneratedComponent {
   id: string;
   componentId: string;
@@ -102,8 +105,8 @@ export default function App() {
   const handleSelectComponent = async (componentId: string) => {
     setSelectedComponentId(componentId);
     setChatMessages([]);
-    await getChatMessages(componentId).then(messages => {
-      const formattedMessages: ChatMessage[] = messages.map(msg => ({
+    await getChatMessages(componentId).then((messages: ChatMessageFromDB[]) => {
+      const formattedMessages: ChatMessage[] = messages.map((msg) => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content,
         timestamp: msg.created_at as Date,
@@ -153,15 +156,15 @@ export default function App() {
 
   useEffect(() => {
     if (!user) return;
-    getProject(user.id).then((projects) => {
+    getProject(user.id).then((projects: ProjectWithRelations[]) => {
       const projectData: Project[] = projects.map((proj) => ({
         id: proj.id,
         name: proj.title,
         createdAt: proj.created_at,
       }));
 
-      const allComponents: Component[] = projects.flatMap(proj =>
-        proj.project_components.map(pc => ({
+      const allComponents: Component[] = projects.flatMap((proj) =>
+        proj.project_components.map((pc) => ({
           id: pc.id,
           projectId: proj.id,
           name: pc.title,
@@ -169,9 +172,9 @@ export default function App() {
         }))
       );
 
-      const allVersions: GeneratedComponent[] = projects.flatMap(proj =>
-        proj.project_components.flatMap(pc =>
-          pc.component_versions.map(cv => ({
+      const allVersions: GeneratedComponent[] = projects.flatMap((proj) =>
+        proj.project_components.flatMap((pc) =>
+          pc.component_versions.map((cv) => ({
             id: cv.id,
             componentId: pc.id,
             code: cv.generated_code,
