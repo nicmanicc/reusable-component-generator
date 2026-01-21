@@ -348,7 +348,6 @@ export default function App() {
             onCreateComponent={handleCreateComponent}
             onDeleteProject={handleDeleteProject}
             onDeleteComponent={handleDeleteComponent}
-            darkMode={isDarkMode}
           />
         </div>
 

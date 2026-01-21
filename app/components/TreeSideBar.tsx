@@ -47,7 +47,6 @@ interface TreeSidebarProps {
   onCreateComponent: (name: string) => void;
   onDeleteProject: (projectId: string) => void;
   onDeleteComponent: (componentId: string) => void;
-  darkMode: boolean;
 }
 
 export function TreeSidebar({
@@ -64,7 +63,6 @@ export function TreeSidebar({
   onCreateComponent,
   onDeleteProject,
   onDeleteComponent,
-  darkMode,
 }: TreeSidebarProps) {
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
   const [expandedComponents, setExpandedComponents] = useState<Set<string>>(new Set());
