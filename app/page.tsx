@@ -5,7 +5,7 @@ import { ComponentGenerator } from './components/ComponentGenerator';
 import { CodeViewer } from './components/CodeViewer';
 import { ComponentPreview } from './components/ComponentPreview';
 import { ChatInterface } from './components/ChatInterface';
-import { Sparkles, Moon, Sun, LogOut } from 'lucide-react';
+import { Sparkles, Moon, Sun, LogOut, X, Menu } from 'lucide-react';
 import {
   SandpackProvider,
 } from "@codesandbox/sandpack-react";
@@ -50,6 +50,7 @@ export default function App() {
   const [updatedCode, setUpdatedCode] = useState<string>('');
   const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>([]);
   const [user, setUser] = useState<any>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
 
   // Project handlers
@@ -294,6 +295,13 @@ export default function App() {
         <div className="mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                title="Toggle sidebar"
+              >
+                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
               <div className="bg-linear-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
@@ -331,9 +339,19 @@ export default function App() {
 
       {/* Main Workspace - Split View */}
       <div className="flex-1 flex overflow-hidden">
+        {sidebarOpen && (
+          <div
+            className="lg:hidden fixed inset-0 bg-black/50 z-20"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
 
         {/* Left Sidebar - History */}
-        <div className="w-64 h-[calc(100vh-5rem)] shrink-0">
+        <div className={`fixed lg:static inset-y-0 left-0 z-30
+              w-64 shrink-0 h-[calc(100vh-5rem)]
+              transform transition-transform duration-300 ease-in-out
+              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+              ${sidebarOpen ? 'h-full' : 'h-[calc(100vh-5rem)]'}`}>
           <TreeSidebar
             projects={projects}
             components={components}
