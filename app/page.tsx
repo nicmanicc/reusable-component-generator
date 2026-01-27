@@ -114,15 +114,6 @@ export default function App() {
       }));
       setChatMessages(formattedMessages);
     });
-
-    // Load the latest version for this component
-    const componentVersions = versions.filter(v => v.componentId === componentId);
-    if (componentVersions.length > 0) {
-      const latestVersion = componentVersions[componentVersions.length - 1];
-      setCurrentVersionId(latestVersion.id);
-    } else {
-      setCurrentVersionId(null);
-    }
   };
 
   const handleDeleteComponent = async (componentId: string) => {
@@ -138,8 +129,11 @@ export default function App() {
   };
 
   const handleSelectVersion = (versionId: string) => {
-    handleSelectComponent(versions.find(v => v.id === versionId)?.componentId as string);
     setCurrentVersionId(versionId);
+    const currentComponentId = versions.find(v => v.id === versionId)?.componentId;
+    if (selectedComponentId !== currentComponentId) {
+      handleSelectComponent(currentComponentId as string);
+    }
   };
 
 
