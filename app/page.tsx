@@ -114,6 +114,17 @@ export default function App() {
       }));
       setChatMessages(formattedMessages);
     });
+
+    if (currentVersionId === null || versions.find(v => v.id === currentVersionId)?.componentId !== componentId) {
+      const latestVersion = versions
+        .filter(v => v.componentId === componentId)
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
+      if (latestVersion) {
+        setCurrentVersionId(latestVersion.id);
+      }
+    }
+
+
   };
 
   const handleDeleteComponent = async (componentId: string) => {
@@ -132,7 +143,7 @@ export default function App() {
     setCurrentVersionId(versionId);
     const currentComponentId = versions.find(v => v.id === versionId)?.componentId;
     if (selectedComponentId !== currentComponentId) {
-      handleSelectComponent(currentComponentId as string);
+      setSelectedComponentId(currentComponentId as string);
     }
   };
 
