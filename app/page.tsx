@@ -51,6 +51,9 @@ export default function App() {
   const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>([]);
   const [user, setUser] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [messageInput, setMessageInput] = useState('');
+  const [messageInputError, setMessageInputError] = useState(false);
 
 
   // Project handlers
@@ -248,7 +251,6 @@ export default function App() {
         timestamp: new Date(),
       }
     } else {
-      console.log(selectedComponentId, versions.length);
       const versionLength = versions.filter(v => v.componentId === selectedComponentId).length;
       const version = await createVersion(selectedComponentId as string, versionLength + 1, prompt, refinedComponent);
 
@@ -270,6 +272,37 @@ export default function App() {
     setChatMessages(prev => [...prev, assistantMessage]);
     setIsGenerating(false);
   };
+
+  const handleSave = async () => {
+    setIsGenerating(true);
+    setSaved(true);
+    //Check if updatedCode is different from currentVersion code
+    const currentVersion = currentVersionId
+      ? versions.find(v => v.id === currentVersionId)
+      : null;
+    if (!currentVersion || currentVersion.code === updatedCode || messageInput.trim() === '') {
+      setIsGenerating(false);
+      setSaved(false);
+      setMessageInputError(true);
+      return;
+    }
+    const versionLength = versions.filter(v => v.componentId === selectedComponentId).length;
+    const version = await createVersion(selectedComponentId as string, versionLength + 1, messageInput, updatedCode);
+
+    const newComponent: GeneratedComponent = {
+      id: version.id,
+      componentId: selectedComponentId as string,
+      code: updatedCode,
+      timestamp: new Date(),
+      prompt: messageInput,
+    };
+    setVersions(prev => [...prev, newComponent]);
+    setCurrentVersionId(newComponent.id);
+    setIsGenerating(false);
+    setSaved(false);
+    setMessageInput('');
+    setMessageInputError(false);
+  }
 
   const currentVersion = currentVersionId
     ? versions.find(v => v.id === currentVersionId)
@@ -404,7 +437,7 @@ export default function App() {
                     externalResources: ["https://cdn.tailwindcss.com"],
                   }} files={sandpackFiles} theme={isDarkMode ? "dark" : "light"}>
                     <ComponentPreview code={currentVersion.code} />
-                    <CodeViewer onCodeChanged={setUpdatedCode} />
+                    <CodeViewer onCodeChanged={setUpdatedCode} handleSave={handleSave} setMessageInput={setMessageInput} messageInput={messageInput} messageInputError={messageInputError} saved={saved} />
                   </SandpackProvider>
 
                 </div>
