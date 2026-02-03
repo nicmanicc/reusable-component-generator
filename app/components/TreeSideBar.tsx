@@ -70,6 +70,7 @@ export function TreeSidebar({
   const [creatingComponentForProject, setCreatingComponentForProject] = useState<string | null>(null);
   const [newItemName, setNewItemName] = useState('');
   const [menuOpen, setMenuOpen] = useState<{ type: 'project' | 'component'; id: string } | null>(null);
+  const [disabled, setDisabled] = useState(false);
 
   const toggleProject = (projectId: string) => {
     const newExpanded = new Set(expandedProjects);
@@ -102,7 +103,7 @@ export function TreeSidebar({
 
   const handleCreateComponent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newItemName.trim() && creatingComponentForProject) {
+    if (!disabled && newItemName.trim() && creatingComponentForProject) {
       onCreateComponent(newItemName.trim());
       setNewItemName('');
       setCreatingComponentForProject(null);
@@ -260,15 +261,27 @@ export function TreeSidebar({
                       {/* New Component Form */}
                       {creatingComponentForProject === project.id && (
                         <form onSubmit={handleCreateComponent} className="px-2 py-1.5">
-                          <div className="flex items-center gap-1 pl-4">
+                          <div className="flex items-center flex-wrap gap-1 pl-4">
+                            <div className="w-full">
+                              {disabled && <span className="text-red-500 text-xs block">Duplicate name</span>}
+
+                            </div>
                             <Box className="w-4 h-4 text-slate-400 shrink-0" />
                             <input
                               type="text"
                               value={newItemName}
-                              onChange={(e) => setNewItemName(e.target.value)}
+                              onChange={(e) => {
+                                setNewItemName(e.target.value)
+                                if (e.target.value.trim()) {
+                                  const duplicate = components.find(c => c.name.toLowerCase() === e.target.value.trim().toLowerCase());
+                                  setDisabled(!!duplicate);
+                                } else {
+                                  setDisabled(false);
+                                }
+                              }}
                               placeholder="Component name..."
                               autoFocus
-                              className="flex-1 px-2 py-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded border border-indigo-500 focus:outline-none"
+                              className={`flex-1 px-2 py-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded border border-indigo-500 focus:outline-none ${disabled ? 'border-red-500' : ''}`}
                               onBlur={() => {
                                 if (!newItemName.trim()) {
                                   setCreatingComponentForProject(null);
