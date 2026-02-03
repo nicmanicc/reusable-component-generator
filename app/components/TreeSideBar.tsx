@@ -71,6 +71,7 @@ export function TreeSidebar({
   const [newItemName, setNewItemName] = useState('');
   const [menuOpen, setMenuOpen] = useState<{ type: 'project' | 'component'; id: string } | null>(null);
   const [disabled, setDisabled] = useState(false);
+  const [projectDuplicate, setProjectDuplicate] = useState(false);
 
   const toggleProject = (projectId: string) => {
     const newExpanded = new Set(expandedProjects);
@@ -94,10 +95,11 @@ export function TreeSidebar({
 
   const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newItemName.trim()) {
+    if (!projectDuplicate && newItemName.trim()) {
       onCreateProject(newItemName.trim());
       setNewItemName('');
       setIsCreatingProject(false);
+      setProjectDuplicate(false);
     }
   };
 
@@ -141,15 +143,27 @@ export function TreeSidebar({
         {/* New Project Form */}
         {isCreatingProject && (
           <form onSubmit={handleCreateProject} className="px-2 py-2">
-            <div className="flex items-center gap-1 pl-0">
+            <div className="flex items-center flex-wrap gap-1 pl-0">
+              <div className="w-full">
+                {projectDuplicate && <span className="text-red-500 text-xs block">Duplicate name</span>}
+
+              </div>
               <Folder className="w-4 h-4 text-slate-400 shrink-0" />
               <input
                 type="text"
                 value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
+                onChange={(e) => {
+                  setNewItemName(e.target.value);
+                  if (e.target.value.trim()) {
+                    const duplicate = projects.find(p => p.name.toLowerCase() === e.target.value.trim().toLowerCase());
+                    setProjectDuplicate(!!duplicate);
+                  } else {
+                    setProjectDuplicate(false);
+                  }
+                }}
                 placeholder="Project name..."
                 autoFocus
-                className="flex-1 px-2 py-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded border border-indigo-500 focus:outline-none"
+                className={`flex-1 px-2 py-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded border ${projectDuplicate ? 'border-red-500' : 'border-indigo-500'} focus:outline-none`}
                 onBlur={() => {
                   if (!newItemName.trim()) {
                     setIsCreatingProject(false);
