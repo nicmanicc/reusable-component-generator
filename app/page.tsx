@@ -106,8 +106,7 @@ export default function App() {
     setChatMessages([]);
   };
 
-  const handleSelectComponent = async (componentId: string) => {
-    setSelectedComponentId(componentId);
+  const requestChatMessages = async (componentId: string) => {
     setChatMessages([]);
     await getChatMessages(componentId).then((messages: ChatMessageFromDB[]) => {
       const formattedMessages: ChatMessage[] = messages.map((msg) => ({
@@ -117,6 +116,11 @@ export default function App() {
       }));
       setChatMessages(formattedMessages);
     });
+  }
+
+  const handleSelectComponent = (componentId: string) => {
+    setSelectedComponentId(componentId);
+    requestChatMessages(componentId);
 
     if (currentVersionId === null || versions.find(v => v.id === currentVersionId)?.componentId !== componentId) {
       const latestVersion = versions
@@ -144,9 +148,11 @@ export default function App() {
 
   const handleSelectVersion = (versionId: string) => {
     setCurrentVersionId(versionId);
+
     const currentComponentId = versions.find(v => v.id === versionId)?.componentId;
     if (selectedComponentId !== currentComponentId) {
       setSelectedComponentId(currentComponentId as string);
+      requestChatMessages(currentComponentId as string);
     }
   };
 
