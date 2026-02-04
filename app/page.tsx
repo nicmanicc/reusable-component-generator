@@ -119,6 +119,7 @@ export default function App() {
   }
 
   const handleSelectComponent = (componentId: string) => {
+    setCurrentVersionId(null);
     setSelectedComponentId(componentId);
     requestChatMessages(componentId);
 
