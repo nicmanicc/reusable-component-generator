@@ -31,7 +31,7 @@ export default function SignIn() {
       return;
     }
     setIsLoading(false);
-    router.push('/');
+    router.push('/dashboard');
   };
 
   return (

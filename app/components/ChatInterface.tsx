@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, User, Sparkles } from 'lucide-react';
-import { ChatMessage } from '../page';
+import { ChatMessage } from '../dashboard/page';
 
 interface ChatInterfaceProps {
   messages: ChatMessage[];

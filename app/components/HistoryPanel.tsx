@@ -1,5 +1,5 @@
 import { History, RotateCcw, Clock } from 'lucide-react';
-import { GeneratedComponent } from '../page';
+import { GeneratedComponent } from '../dashboard/page';
 
 interface HistoryPanelProps {
   history: GeneratedComponent[];

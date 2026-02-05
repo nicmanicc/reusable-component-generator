@@ -44,7 +44,7 @@ export default function SignUp() {
       return;
     }
 
-    router.push('/');
+    router.push('/dashboard');
     setIsLoading(false);
   };
 
