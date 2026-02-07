@@ -124,6 +124,8 @@ export default function App() {
 
   const handleSelectComponent = (componentId: string) => {
     setCurrentVersionId(null);
+    setMessageInputError(false);
+    setMessageInput('');
     setSelectedComponentId(componentId);
     requestChatMessages(componentId);
 
@@ -153,7 +155,8 @@ export default function App() {
 
   const handleSelectVersion = (versionId: string) => {
     setCurrentVersionId(versionId);
-
+    setMessageInputError(false);
+    setMessageInput('');
     const currentComponentId = versions.find(v => v.id === versionId)?.componentId;
     if (selectedComponentId !== currentComponentId) {
       setSelectedComponentId(currentComponentId as string);
