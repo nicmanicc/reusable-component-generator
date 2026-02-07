@@ -340,7 +340,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-linear-to-br dark:from-slate-900 dark:to-slate-800 from-slate-50 to-slate-100  ">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm">
+      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 shadow-sm">
         <div className="mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -397,7 +397,7 @@ export default function App() {
 
         {/* Left Sidebar - History */}
         <div className={`fixed lg:static inset-y-0 left-0 z-30
-              w-64 shrink-0 h-[calc(100vh-5rem)]
+              w-64 shrink-0 h-screen
               transform transition-transform duration-300 ease-in-out
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
               ${sidebarOpen ? 'h-full' : 'h-[calc(100vh-5rem)]'}`}>
