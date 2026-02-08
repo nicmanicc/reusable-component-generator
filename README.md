@@ -2,6 +2,9 @@
 
 Generate React + Tailwind components from plain English, preview them live, and iterate via chat.
 
+## Live Preview
+https://reusable-component-generator.vercel.app/
+
 ## Tech stack
 
 - Next.js (App Router) + React
