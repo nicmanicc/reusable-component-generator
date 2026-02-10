@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, MessageSquare, User, Sparkles } from 'lucide-react';
 import { ChatMessage } from '../dashboard/page';
+import Header from './Header';
 
 interface ChatInterfaceProps {
   messages: ChatMessage[];
@@ -33,14 +34,7 @@ export function ChatInterface({ messages, onSendMessage, isGenerating, refinemen
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col h-full sticky top-24">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-          <h3 className="text-slate-900 dark:text-white">Refine Component</h3>
-        </div>
-      </div>
-
+      <Header title="Refine Component" icon={MessageSquare} />
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
 

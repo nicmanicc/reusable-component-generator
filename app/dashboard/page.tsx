@@ -15,7 +15,6 @@ import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
 import { createComponent, getProject, createProject, deleteProject, deleteComponent, createVersion, createChatMessage, getChatMessages } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from '../components/TreeSideBar';
-import { set } from 'zod';
 
 type ProjectWithRelations = Awaited<ReturnType<typeof getProject>>[number];
 type ChatMessageFromDB = Awaited<ReturnType<typeof getChatMessages>>[number];
