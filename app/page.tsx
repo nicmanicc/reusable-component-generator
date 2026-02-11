@@ -25,7 +25,7 @@ export default function LandingPage({ onGetStarted, onToggleDarkMode }: LandingP
                 <div className="bg-linear-to-br from-indigo-500 to-purple-600 p-1.5 rounded-lg">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-lg text-slate-900 dark:text-white">Component Gen</h1>
+                <h1 className="text-lg text-slate-900 dark:text-white">ShareUI</h1>
               </div>
               <div className="flex items-center gap-3">
                 <ToggleThemeButton />

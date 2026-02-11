@@ -44,7 +44,7 @@ export default function SignIn() {
             <Sparkles className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-slate-900 dark:text-white mb-2">Welcome Back</h1>
-          <p className="text-slate-600 dark:text-slate-400">Sign in to continue to AI Component Generator</p>
+          <p className="text-slate-600 dark:text-slate-400">Sign in to continue to ShareUI</p>
         </div>
 
         {/* Sign In Form */}

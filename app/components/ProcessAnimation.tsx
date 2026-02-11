@@ -37,7 +37,7 @@ export function ProcessAnimation({ darkMode }: ProcessAnimationProps) {
                 <div className="w-3 h-3 rounded-full bg-green-400"></div>
               </div>
               <div className="flex-1 text-center">
-                <span className="text-sm text-slate-600 dark:text-slate-400">AI Component Generator</span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">ShareUI</span>
               </div>
             </div>
 

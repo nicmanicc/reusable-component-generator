@@ -358,8 +358,8 @@ export default function App() {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-slate-900 dark:text-white">AI Component Generator</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Create reusable React components with AI</p>
+                <h1 className="text-slate-900 dark:text-white">ShareUI</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Describe, preview, refine, and copy your components with ease.</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
