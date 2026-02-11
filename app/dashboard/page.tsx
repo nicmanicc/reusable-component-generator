@@ -15,6 +15,7 @@ import { signout } from '@/lib/auth-actions';
 import { createClient } from "@/utils/supabase/client";
 import { createComponent, getProject, createProject, deleteProject, deleteComponent, createVersion, createChatMessage, getChatMessages } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from '../components/TreeSideBar';
+import ToggleThemeButton from '../components/ToggleThemeButton';
 
 type ProjectWithRelations = Awaited<ReturnType<typeof getProject>>[number];
 type ChatMessageFromDB = Awaited<ReturnType<typeof getChatMessages>>[number];
@@ -362,13 +363,7 @@ export default function App() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={toggleDarkMode}
-                className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
+              <ToggleThemeButton />
               <div className="flex items-center gap-3 pl-3 border-l border-slate-300 dark:border-slate-600">
                 <div className="text-right">
                   <p className="text-sm text-slate-900 dark:text-white">{user?.name || user?.identities[0].identity_data.full_name}</p>

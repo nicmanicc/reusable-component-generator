@@ -3,6 +3,7 @@ import { Sparkles, Moon, Sun } from 'lucide-react';
 import { ProcessAnimation } from './components/ProcessAnimation';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ToggleThemeButton from './components/ToggleThemeButton';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -27,13 +28,7 @@ export default function LandingPage({ onGetStarted, onToggleDarkMode }: LandingP
                 <h1 className="text-lg text-slate-900 dark:text-white">Component Gen</h1>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                  title={darkMode ? 'Light mode' : 'Dark mode'}
-                >
-                  {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                </button>
+                <ToggleThemeButton />
                 <button
                   onClick={() => router.push('/auth/login')}
                   className="px-5 py-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white text-sm rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg"
