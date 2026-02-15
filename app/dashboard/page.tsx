@@ -16,6 +16,7 @@ import { createClient } from "@/utils/supabase/client";
 import { createComponent, getProject, createProject, deleteProject, deleteComponent, createVersion, createChatMessage, getChatMessages } from '@/lib/prisma-actions';
 import { Project, Component, TreeSidebar, Version } from '../components/TreeSideBar';
 import ToggleThemeButton from '../components/ToggleThemeButton';
+import { toast } from 'sonner';
 
 type ProjectWithRelations = Awaited<ReturnType<typeof getProject>>[number];
 type ChatMessageFromDB = Awaited<ReturnType<typeof getChatMessages>>[number];
@@ -61,8 +62,9 @@ export default function App() {
   const handleCreateProject = async (name: string) => {
     try {
       const newProjectFromDB = await createProject(user.id, name);
+      toast.success('Project created successfully!');
       if (!newProjectFromDB) {
-        alert('Failed to create project');
+        toast.error('Failed to create project');
         return;
       }
       const newProject: Project = {
@@ -73,7 +75,7 @@ export default function App() {
       setProjects(prev => [...prev, newProject]);
       setSelectedProjectId(newProject.id);
     } catch (error) {
-      alert((error as Error).message);
+      toast.error((error as Error).message);
       return;
     }
 
@@ -104,8 +106,9 @@ export default function App() {
     if (!selectedProjectId) return;
     try {
       const newComponentFromDB = await createComponent(selectedProjectId, name);
+      toast.success('Component created successfully!');
       if (!newComponentFromDB) {
-        alert('Failed to create component');
+        toast.error('Failed to create component');
         return;
       }
 
@@ -120,7 +123,7 @@ export default function App() {
       setCurrentVersionId(null);
       setChatMessages([]);
     } catch (error) {
-      alert((error as Error).message);
+      toast.error((error as Error).message);
       return;
     }
   };
