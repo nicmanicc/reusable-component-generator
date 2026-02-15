@@ -102,21 +102,27 @@ export default function App() {
   // Component handlers
   const handleCreateComponent = async (name: string) => {
     if (!selectedProjectId) return;
-    const newComponentFromDB = await createComponent(selectedProjectId, name);
+    try {
+      const newComponentFromDB = await createComponent(selectedProjectId, name);
+      if (!newComponentFromDB) {
+        alert('Failed to create component');
+        return;
+      }
 
-
-    const newComponent: Component = {
-      id: newComponentFromDB.id,
-      projectId: selectedProjectId,
-      name,
-      createdAt: new Date(),
-    };
-
-
-    setComponents(prev => [...prev, newComponent]);
-    setSelectedComponentId(newComponent.id);
-    setCurrentVersionId(null);
-    setChatMessages([]);
+      const newComponent: Component = {
+        id: newComponentFromDB.id,
+        projectId: selectedProjectId,
+        name,
+        createdAt: new Date(),
+      };
+      setComponents(prev => [...prev, newComponent]);
+      setSelectedComponentId(newComponent.id);
+      setCurrentVersionId(null);
+      setChatMessages([]);
+    } catch (error) {
+      alert((error as Error).message);
+      return;
+    }
   };
 
   const requestChatMessages = async (componentId: string) => {

@@ -48,12 +48,24 @@ export async function deleteProject(project_id: string) {
 }
 
 export async function createComponent(project_id: string, title: string) {
-  return prisma.project_components.create({
-    data: {
-      project_id: project_id,
-      title: title,
-    },
-  });
+  try {
+    return prisma.project_components.create({
+      data: {
+        project_id: project_id,
+        title: title,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        throw new Error(
+          "A component with this name already exists in this project.",
+        );
+      } else {
+        throw new Error("An error occurred while creating the component.");
+      }
+    }
+  }
 }
 
 export async function deleteComponent(component_id: string) {
