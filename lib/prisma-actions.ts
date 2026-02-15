@@ -1,13 +1,24 @@
 "use server";
 import { prisma } from "@/utils/prisma/client";
+import { Prisma } from "@prisma/client";
 
 export async function createProject(user_id: string, name: string) {
-  return prisma.projects.create({
-    data: {
-      user_id: user_id,
-      title: name,
-    },
-  });
+  try {
+    return await prisma.projects.create({
+      data: {
+        user_id: user_id,
+        title: name,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        throw new Error("A project with this name already exists.");
+      } else {
+        throw new Error("An error occurred while creating the project.");
+      }
+    }
+  }
 }
 
 export async function getProject(user_id: string) {

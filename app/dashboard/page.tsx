@@ -59,15 +59,24 @@ export default function App() {
 
   // Project handlers
   const handleCreateProject = async (name: string) => {
-    const newProjectFromDB = await createProject(user.id, name);
+    try {
+      const newProjectFromDB = await createProject(user.id, name);
+      if (!newProjectFromDB) {
+        alert('Failed to create project');
+        return;
+      }
+      const newProject: Project = {
+        id: newProjectFromDB.id,
+        name,
+        createdAt: new Date(),
+      };
+      setProjects(prev => [...prev, newProject]);
+      setSelectedProjectId(newProject.id);
+    } catch (error) {
+      alert((error as Error).message);
+      return;
+    }
 
-    const newProject: Project = {
-      id: newProjectFromDB.id,
-      name,
-      createdAt: new Date(),
-    };
-    setProjects(prev => [...prev, newProject]);
-    setSelectedProjectId(newProject.id);
   };
 
   const handleSelectProject = (projectId: string) => {
