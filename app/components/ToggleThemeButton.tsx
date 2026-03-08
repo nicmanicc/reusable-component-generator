@@ -1,22 +1,24 @@
-import { Sun, Moon } from "lucide-react";
-import { useEffect, useState } from "react"
-import { useTheme } from "next-themes";
+import { Sun, Moon } from 'lucide-react';
+import { useSyncExternalStore } from 'react';
+import { useTheme } from 'next-themes';
+
+const emptySubscribe = () => () => {};
 
 export default function ToggleThemeButton() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
 
   const toggleDarkMode = () => {
-    setTheme(isDarkMode ? "light" : "dark");
+    setTheme(isDarkMode ? 'light' : 'dark');
   };
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  if (!mounted) return null;
 
-  if (!mounted) return null
-
-  const isDarkMode = theme === "dark";
+  const isDarkMode = theme === 'dark';
 
   return (
     <button
