@@ -6,17 +6,30 @@ import { CodeViewer } from '../components/CodeViewer';
 import { ComponentPreview } from '../components/ComponentPreview';
 import { ChatInterface } from '../components/ChatInterface';
 import { Sparkles, Moon, Sun, LogOut, X, Menu } from 'lucide-react';
-import {
-  SandpackProvider,
-} from "@codesandbox/sandpack-react";
+import { SandpackProvider } from '@codesandbox/sandpack-react';
 import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from '../actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
-import { createClient } from "@/utils/supabase/client";
-import { createComponent, getProject, createProject, deleteProject, deleteComponent, createVersion, createChatMessage, getChatMessages } from '@/lib/prisma-actions';
-import { Project, Component, TreeSidebar, Version } from '../components/TreeSideBar';
+import { createClient } from '@/utils/supabase/client';
+import {
+  createComponent,
+  getProject,
+  createProject,
+  deleteProject,
+  deleteComponent,
+  createVersion,
+  createChatMessage,
+  getChatMessages,
+} from '@/lib/prisma-actions';
+import {
+  Project,
+  Component,
+  TreeSidebar,
+  Version,
+} from '../components/TreeSideBar';
 import ToggleThemeButton from '../components/ToggleThemeButton';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 type ProjectWithRelations = Awaited<ReturnType<typeof getProject>>[number];
 type ChatMessageFromDB = Awaited<ReturnType<typeof getChatMessages>>[number];
@@ -34,29 +47,33 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
-
 export default function App() {
   // Project/Component state
   const [projects, setProjects] = useState<Project[]>([]);
   const [components, setComponents] = useState<Component[]>([]);
   const [versions, setVersions] = useState<GeneratedComponent[]>([]);
+  const { theme } = useTheme();
 
   // Selection state
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null,
+  );
+  const [selectedComponentId, setSelectedComponentId] = useState<string | null>(
+    null,
+  );
   const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [updatedCode, setUpdatedCode] = useState<string>('');
-  const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>([]);
+  const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>(
+    [],
+  );
   const [user, setUser] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [messageInput, setMessageInput] = useState('');
   const [messageInputError, setMessageInputError] = useState(false);
-
 
   // Project handlers
   const handleCreateProject = async (name: string) => {
@@ -72,13 +89,12 @@ export default function App() {
         name,
         createdAt: new Date(),
       };
-      setProjects(prev => [...prev, newProject]);
+      setProjects((prev) => [...prev, newProject]);
       setSelectedProjectId(newProject.id);
     } catch (error) {
       toast.error((error as Error).message);
       return;
     }
-
   };
 
   const handleSelectProject = (projectId: string) => {
@@ -90,8 +106,8 @@ export default function App() {
 
   const handleDeleteProject = async (projectId: string) => {
     await deleteProject(projectId);
-    setProjects(prev => prev.filter(p => p.id !== projectId));
-    setComponents(prev => prev.filter(c => c.projectId !== projectId));
+    setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    setComponents((prev) => prev.filter((c) => c.projectId !== projectId));
 
     if (selectedProjectId === projectId) {
       setSelectedProjectId(null);
@@ -118,7 +134,7 @@ export default function App() {
         name,
         createdAt: new Date(),
       };
-      setComponents(prev => [...prev, newComponent]);
+      setComponents((prev) => [...prev, newComponent]);
       setSelectedComponentId(newComponent.id);
       setCurrentVersionId(null);
       setChatMessages([]);
@@ -138,7 +154,7 @@ export default function App() {
       }));
       setChatMessages(formattedMessages);
     });
-  }
+  };
 
   const handleSelectComponent = (componentId: string) => {
     setCurrentVersionId(null);
@@ -147,22 +163,24 @@ export default function App() {
     setSelectedComponentId(componentId);
     requestChatMessages(componentId);
 
-    if (currentVersionId === null || versions.find(v => v.id === currentVersionId)?.componentId !== componentId) {
+    if (
+      currentVersionId === null ||
+      versions.find((v) => v.id === currentVersionId)?.componentId !==
+        componentId
+    ) {
       const latestVersion = versions
-        .filter(v => v.componentId === componentId)
+        .filter((v) => v.componentId === componentId)
         .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
       if (latestVersion) {
         setCurrentVersionId(latestVersion.id);
       }
     }
-
-
   };
 
   const handleDeleteComponent = async (componentId: string) => {
     await deleteComponent(componentId);
-    setComponents(prev => prev.filter(c => c.id !== componentId));
-    setVersions(prev => prev.filter(v => v.componentId !== componentId));
+    setComponents((prev) => prev.filter((c) => c.id !== componentId));
+    setVersions((prev) => prev.filter((v) => v.componentId !== componentId));
 
     if (selectedComponentId === componentId) {
       setSelectedComponentId(null);
@@ -175,13 +193,14 @@ export default function App() {
     setCurrentVersionId(versionId);
     setMessageInputError(false);
     setMessageInput('');
-    const currentComponentId = versions.find(v => v.id === versionId)?.componentId;
+    const currentComponentId = versions.find(
+      (v) => v.id === versionId,
+    )?.componentId;
     if (selectedComponentId !== currentComponentId) {
       setSelectedComponentId(currentComponentId as string);
       requestChatMessages(currentComponentId as string);
     }
   };
-
 
   const supabase = createClient();
 
@@ -205,57 +224,42 @@ export default function App() {
       }));
 
       const allComponents: Component[] = projects.flatMap((proj) =>
-        proj.project_components.map((pc: ProjectWithRelations['project_components'][number]) => ({
-          id: pc.id,
-          projectId: proj.id,
-          name: pc.title,
-          createdAt: pc.created_at as Date,
-        }))
+        proj.project_components.map(
+          (pc: ProjectWithRelations['project_components'][number]) => ({
+            id: pc.id,
+            projectId: proj.id,
+            name: pc.title,
+            createdAt: pc.created_at as Date,
+          }),
+        ),
       );
 
       const allVersions: GeneratedComponent[] = projects.flatMap((proj) =>
-        proj.project_components.flatMap((pc: ProjectWithRelations['project_components'][number]) =>
-          pc.component_versions.map((cv: ProjectWithRelations['project_components'][number]['component_versions'][number]) => ({
-            id: cv.id,
-            componentId: pc.id,
-            code: cv.generated_code,
-            timestamp: cv.created_at as Date,
-            prompt: cv.prompt,
-          }))
-        )
+        proj.project_components.flatMap(
+          (pc: ProjectWithRelations['project_components'][number]) =>
+            pc.component_versions.map(
+              (
+                cv: ProjectWithRelations['project_components'][number]['component_versions'][number],
+              ) => ({
+                id: cv.id,
+                componentId: pc.id,
+                code: cv.generated_code,
+                timestamp: cv.created_at as Date,
+                prompt: cv.prompt,
+              }),
+            ),
+        ),
       );
       setProjects(projectData);
       setComponents(allComponents);
       setVersions(allVersions);
-
     });
   }, [user]);
 
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    if (savedMode === 'true') {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-
-  }, []);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(prev => {
-      const newMode = !prev;
-      if (newMode) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('darkMode', 'true');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('darkMode', 'false');
-      }
-      return newMode;
-    });
-  };
-
-  const handleGenerate = async (prompt: string, isRefinement: boolean = false) => {
+  const handleGenerate = async (
+    prompt: string,
+    isRefinement: boolean = false,
+  ) => {
     setIsGenerating(true);
 
     const userMessage: ChatMessage = {
@@ -263,28 +267,39 @@ export default function App() {
       content: prompt,
       timestamp: new Date(),
     };
-    setChatMessages(prev => [...prev, userMessage]);
+    setChatMessages((prev) => [...prev, userMessage]);
     await createChatMessage(selectedComponentId as string, 'user', prompt);
 
-    const response = JSON.parse(isRefinement ? await generateComponent(prompt, updatedCode) : await generateComponent(prompt));
+    const response = JSON.parse(
+      isRefinement
+        ? await generateComponent(prompt, updatedCode)
+        : await generateComponent(prompt),
+    );
 
-    var refinedComponent = response.code;
-    var assistantMessage: ChatMessage = {
+    const refinedComponent = response.code;
+    let assistantMessage: ChatMessage = {
       role: 'assistant',
       content: isRefinement
         ? `I've updated the component based on your request: "${prompt}"`
         : `I've generated a new component based on your prompt: "${prompt}"`,
       timestamp: new Date(),
-    }
+    };
     if (!response.changed) {
       assistantMessage = {
         role: 'assistant',
         content: `The requested changes could not be applied. Here's the original component code.`,
         timestamp: new Date(),
-      }
+      };
     } else {
-      const versionLength = versions.filter(v => v.componentId === selectedComponentId).length;
-      const version = await createVersion(selectedComponentId as string, versionLength + 1, prompt, refinedComponent);
+      const versionLength = versions.filter(
+        (v) => v.componentId === selectedComponentId,
+      ).length;
+      const version = await createVersion(
+        selectedComponentId as string,
+        versionLength + 1,
+        prompt,
+        refinedComponent,
+      );
 
       const newComponent: GeneratedComponent = {
         id: version.id,
@@ -293,15 +308,18 @@ export default function App() {
         timestamp: new Date(),
         prompt: prompt,
       };
-      setVersions(prev => [...prev, newComponent]);
+      setVersions((prev) => [...prev, newComponent]);
       setCurrentVersionId(newComponent.id);
       setRefinementSuggestions(response.actions || []);
     }
 
-    await createChatMessage(selectedComponentId as string, 'assistant', assistantMessage.content);
+    await createChatMessage(
+      selectedComponentId as string,
+      'assistant',
+      assistantMessage.content,
+    );
 
-
-    setChatMessages(prev => [...prev, assistantMessage]);
+    setChatMessages((prev) => [...prev, assistantMessage]);
     setIsGenerating(false);
   };
 
@@ -310,16 +328,27 @@ export default function App() {
     setSaved(true);
     //Check if updatedCode is different from currentVersion code
     const currentVersion = currentVersionId
-      ? versions.find(v => v.id === currentVersionId)
+      ? versions.find((v) => v.id === currentVersionId)
       : null;
-    if (!currentVersion || currentVersion.code === updatedCode || messageInput.trim() === '') {
+    if (
+      !currentVersion ||
+      currentVersion.code === updatedCode ||
+      messageInput.trim() === ''
+    ) {
       setIsGenerating(false);
       setSaved(false);
       setMessageInputError(true);
       return;
     }
-    const versionLength = versions.filter(v => v.componentId === selectedComponentId).length;
-    const version = await createVersion(selectedComponentId as string, versionLength + 1, messageInput, updatedCode);
+    const versionLength = versions.filter(
+      (v) => v.componentId === selectedComponentId,
+    ).length;
+    const version = await createVersion(
+      selectedComponentId as string,
+      versionLength + 1,
+      messageInput,
+      updatedCode,
+    );
 
     const newComponent: GeneratedComponent = {
       id: version.id,
@@ -328,19 +357,19 @@ export default function App() {
       timestamp: new Date(),
       prompt: messageInput,
     };
-    setVersions(prev => [...prev, newComponent]);
+    setVersions((prev) => [...prev, newComponent]);
     setCurrentVersionId(newComponent.id);
     setIsGenerating(false);
     setSaved(false);
     setMessageInput('');
     setMessageInputError(false);
-  }
+  };
 
   const currentVersion = currentVersionId
-    ? versions.find(v => v.id === currentVersionId)
+    ? versions.find((v) => v.id === currentVersionId)
     : null;
 
-  const sidebarVersions: Version[] = versions.map(v => ({
+  const sidebarVersions: Version[] = versions.map((v) => ({
     id: v.id,
     componentId: v.componentId,
     prompt: v.prompt,
@@ -351,11 +380,10 @@ export default function App() {
     () =>
       currentVersion
         ? {
-          "/App.tsx": currentVersion
-            .code
-        }
+            '/App.tsx': currentVersion.code,
+          }
         : undefined,
-    [currentVersion?.id, currentVersion?.code]
+    [currentVersion?.id, currentVersion?.code],
   );
 
   return (
@@ -370,22 +398,32 @@ export default function App() {
                 className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                 title="Toggle sidebar"
               >
-                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {sidebarOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
               </button>
               <div className="bg-linear-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-slate-900 dark:text-white">ShareUI</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Describe, preview, refine, and copy your components with ease.</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Describe, preview, refine, and copy your components with ease.
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <ToggleThemeButton />
               <div className="flex items-center gap-3 pl-3 border-l border-slate-300 dark:border-slate-600">
                 <div className="text-right">
-                  <p className="text-sm text-slate-900 dark:text-white">{user?.name || user?.identities[0].identity_data.full_name}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+                  <p className="text-sm text-slate-900 dark:text-white">
+                    {user?.name || user?.identities[0].identity_data.full_name}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {user?.email}
+                  </p>
                 </div>
                 <button
                   onClick={() => signout()}
@@ -400,7 +438,6 @@ export default function App() {
         </div>
       </header>
 
-
       {/* Main Workspace - Split View */}
       <div className="flex-1 flex overflow-hidden">
         {sidebarOpen && (
@@ -411,11 +448,13 @@ export default function App() {
         )}
 
         {/* Left Sidebar - History */}
-        <div className={`fixed lg:static inset-y-0 left-0 z-30
+        <div
+          className={`fixed lg:static inset-y-0 left-0 z-30
               w-64 shrink-0 h-screen
               transform transition-transform duration-300 ease-in-out
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-              ${sidebarOpen ? 'h-full' : 'h-[calc(100vh-5rem)]'}`}>
+              ${sidebarOpen ? 'h-full' : 'h-[calc(100vh-5rem)]'}`}
+        >
           <TreeSidebar
             projects={projects}
             components={components}
@@ -447,7 +486,9 @@ export default function App() {
                 ) : (
                   <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-12 text-center">
                     <Sparkles className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
-                    <h2 className="text-slate-900 dark:text-white mb-2">Get Started</h2>
+                    <h2 className="text-slate-900 dark:text-white mb-2">
+                      Get Started
+                    </h2>
                     <p className="text-slate-600 dark:text-slate-400">
                       {!selectedProjectId
                         ? 'Create or select a project to begin'
@@ -459,13 +500,24 @@ export default function App() {
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
                 <div className="lg:col-span-2 space-y-6">
-                  <SandpackProvider template="react-ts" options={{
-                    externalResources: ["https://cdn.tailwindcss.com"],
-                  }} files={sandpackFiles} theme={isDarkMode ? "dark" : "light"}>
+                  <SandpackProvider
+                    template="react-ts"
+                    options={{
+                      externalResources: ['https://cdn.tailwindcss.com'],
+                    }}
+                    files={sandpackFiles}
+                    theme={theme ? 'dark' : 'light'}
+                  >
                     <ComponentPreview code={currentVersion.code} />
-                    <CodeViewer onCodeChanged={setUpdatedCode} handleSave={handleSave} setMessageInput={setMessageInput} messageInput={messageInput} messageInputError={messageInputError} saved={saved} />
+                    <CodeViewer
+                      onCodeChanged={setUpdatedCode}
+                      handleSave={handleSave}
+                      setMessageInput={setMessageInput}
+                      messageInput={messageInput}
+                      messageInputError={messageInputError}
+                      saved={saved}
+                    />
                   </SandpackProvider>
-
                 </div>
 
                 {/* Right Sidebar - Chat Refinement */}
@@ -482,8 +534,6 @@ export default function App() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }
-

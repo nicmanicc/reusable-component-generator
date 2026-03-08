@@ -1,21 +1,14 @@
-'use client';
-import { Sparkles, Moon, Sun } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { ProcessAnimation } from './components/ProcessAnimation';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ToggleThemeButton from './components/ToggleThemeButton';
+import { useTheme } from 'next-themes';
 
-interface LandingPageProps {
-  onGetStarted: () => void;
-
-  onToggleDarkMode: () => void;
-}
-
-export default function LandingPage({ onGetStarted, onToggleDarkMode }: LandingPageProps) {
-  const [darkMode, setDarkMode] = useState(false);
+export default function LandingPage() {
+  const { theme } = useTheme();
   const router = useRouter();
   return (
-    <div className={darkMode ? 'dark' : ''}>
+    <div className={theme ? 'dark' : ''}>
       <div className="h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 transition-colors overflow-hidden flex flex-col">
         {/* Header */}
         <header className="border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm transition-colors">
@@ -25,7 +18,9 @@ export default function LandingPage({ onGetStarted, onToggleDarkMode }: LandingP
                 <div className="bg-linear-to-br from-indigo-500 to-purple-600 p-1.5 rounded-lg">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-lg text-slate-900 dark:text-white">ShareUI</h1>
+                <h1 className="text-lg text-slate-900 dark:text-white">
+                  ShareUI
+                </h1>
               </div>
               <div className="flex items-center gap-3">
                 <ToggleThemeButton />
@@ -46,7 +41,6 @@ export default function LandingPage({ onGetStarted, onToggleDarkMode }: LandingP
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Left: Hero Content */}
               <div>
-
                 <h2 className="text-4xl lg:text-5xl text-slate-900 dark:text-white mb-4 leading-tight">
                   React Components
                   <span className="block mt-1 bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -55,38 +49,57 @@ export default function LandingPage({ onGetStarted, onToggleDarkMode }: LandingP
                 </h2>
 
                 <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
-                  Describe what you want. Preview it live. Refine with chat. Copy production-ready code.
+                  Describe what you want. Preview it live. Refine with chat.
+                  Copy production-ready code.
                 </p>
 
                 {/* How it works - Inline */}
                 <div className="space-y-3 mb-8">
                   <div className="flex items-start gap-3">
                     <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-sm text-indigo-600 dark:text-indigo-400">1</span>
+                      <span className="text-sm text-indigo-600 dark:text-indigo-400">
+                        1
+                      </span>
                     </div>
                     <div>
-                      <h4 className="text-slate-900 dark:text-white mb-0.5">Describe</h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Type what you want in natural language</p>
+                      <h4 className="text-slate-900 dark:text-white mb-0.5">
+                        Describe
+                      </h4>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Type what you want in natural language
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-sm text-indigo-600 dark:text-indigo-400">2</span>
+                      <span className="text-sm text-indigo-600 dark:text-indigo-400">
+                        2
+                      </span>
                     </div>
                     <div>
-                      <h4 className="text-slate-900 dark:text-white mb-0.5">Refine</h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Chat with AI to perfect your component</p>
+                      <h4 className="text-slate-900 dark:text-white mb-0.5">
+                        Refine
+                      </h4>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Chat with AI to perfect your component
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-sm text-indigo-600 dark:text-indigo-400">3</span>
+                      <span className="text-sm text-indigo-600 dark:text-indigo-400">
+                        3
+                      </span>
                     </div>
                     <div>
-                      <h4 className="text-slate-900 dark:text-white mb-0.5">Ship</h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Copy clean code to your project</p>
+                      <h4 className="text-slate-900 dark:text-white mb-0.5">
+                        Ship
+                      </h4>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Copy clean code to your project
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -103,7 +116,9 @@ export default function LandingPage({ onGetStarted, onToggleDarkMode }: LandingP
               <div>
                 <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
                   <div className="aspect-4/3">
-                    <ProcessAnimation darkMode={darkMode} />
+                    <ProcessAnimation
+                      darkMode={theme == 'dark' ? true : false}
+                    />
                   </div>
                 </div>
               </div>
