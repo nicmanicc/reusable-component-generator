@@ -11,6 +11,7 @@ import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from '../actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from '@/utils/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import {
   createComponent,
   getProject,
@@ -69,7 +70,7 @@ export default function App() {
   const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>(
     [],
   );
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [messageInput, setMessageInput] = useState('');
@@ -383,7 +384,7 @@ export default function App() {
             '/App.tsx': currentVersion.code,
           }
         : undefined,
-    [currentVersion?.id, currentVersion?.code],
+    [currentVersion],
   );
 
   return (
