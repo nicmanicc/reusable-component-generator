@@ -78,6 +78,10 @@ export default function App() {
 
   // Project handlers
   const handleCreateProject = async (name: string) => {
+    if (!user) {
+      toast.error('User not authenticated');
+      return;
+    }
     try {
       const newProjectFromDB = await createProject(user.id, name);
       toast.success('Project created successfully!');
@@ -213,7 +217,7 @@ export default function App() {
       setUser(user);
     };
     fetchUser();
-  }, []);
+  }, [supabase.auth]);
 
   useEffect(() => {
     if (!user) return;
@@ -420,7 +424,7 @@ export default function App() {
               <div className="flex items-center gap-3 pl-3 border-l border-slate-300 dark:border-slate-600">
                 <div className="text-right">
                   <p className="text-sm text-slate-900 dark:text-white">
-                    {user?.name || user?.identities[0].identity_data.full_name}
+                    {user?.user_metadata?.full_name || user?.email}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     {user?.email}

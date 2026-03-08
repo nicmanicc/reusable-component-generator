@@ -1,3 +1,4 @@
+'use client';
 import { Sparkles } from 'lucide-react';
 import { ProcessAnimation } from './components/ProcessAnimation';
 import { useRouter } from 'next/navigation';
