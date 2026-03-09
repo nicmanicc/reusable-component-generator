@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ComponentGenerator } from '../components/ComponentGenerator';
 import { CodeViewer } from '../components/CodeViewer';
 import { ComponentPreview } from '../components/ComponentPreview';
 import { ChatInterface } from '../components/ChatInterface';
-import { Sparkles, Moon, Sun, LogOut, X, Menu } from 'lucide-react';
+import { Sparkles, LogOut, X, Menu } from 'lucide-react';
 import { SandpackProvider } from '@codesandbox/sandpack-react';
 import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from '../actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from '@/utils/supabase/client';
-import type { User } from '@supabase/supabase-js';
 import {
   createComponent,
   getProject,
@@ -31,6 +30,7 @@ import {
 import ToggleThemeButton from '../components/ToggleThemeButton';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 type ProjectWithRelations = Awaited<ReturnType<typeof getProject>>[number];
 type ChatMessageFromDB = Awaited<ReturnType<typeof getChatMessages>>[number];
@@ -48,12 +48,69 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
+function transformProjectData(projects: ProjectWithRelations[]) {
+  const projectData: Project[] = projects.map((proj) => ({
+    id: proj.id,
+    name: proj.title,
+    createdAt: proj.created_at,
+  }));
+
+  const allComponents: Component[] = projects.flatMap((proj) =>
+    proj.project_components.map(
+      (pc: ProjectWithRelations['project_components'][number]) => ({
+        id: pc.id,
+        projectId: proj.id,
+        name: pc.title,
+        createdAt: pc.created_at as Date,
+      }),
+    ),
+  );
+
+  const allVersions: GeneratedComponent[] = projects.flatMap((proj) =>
+    proj.project_components.flatMap(
+      (pc: ProjectWithRelations['project_components'][number]) =>
+        pc.component_versions.map(
+          (
+            cv: ProjectWithRelations['project_components'][number]['component_versions'][number],
+          ) => ({
+            id: cv.id,
+            componentId: pc.id,
+            code: cv.generated_code,
+            timestamp: cv.created_at as Date,
+            prompt: cv.prompt,
+          }),
+        ),
+    ),
+  );
+
+  return { projectData, allComponents, allVersions };
+}
+
 export default function App() {
-  // Project/Component state
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [components, setComponents] = useState<Component[]>([]);
-  const [versions, setVersions] = useState<GeneratedComponent[]>([]);
+  const queryClient = useQueryClient();
   const { theme } = useTheme();
+  const supabase = createClient();
+
+  // Auth query
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
+  // Projects query (includes components + versions)
+  const { data: projectData } = useQuery({
+    queryKey: ['projects', user?.id],
+    queryFn: () => getProject(user!.id),
+    enabled: !!user,
+    select: transformProjectData,
+  });
+
+  const projects = projectData?.projectData ?? [];
+  const components = projectData?.allComponents ?? [];
+  const versions = projectData?.allVersions ?? [];
 
   // Selection state
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
@@ -64,101 +121,112 @@ export default function App() {
   );
   const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
 
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [updatedCode, setUpdatedCode] = useState<string>('');
   const [refinementSuggestions, setRefinementSuggestions] = useState<string[]>(
     [],
   );
-  const [user, setUser] = useState<User | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [messageInput, setMessageInput] = useState('');
   const [messageInputError, setMessageInputError] = useState(false);
 
-  // Project handlers
-  const handleCreateProject = async (name: string) => {
-    if (!user) {
-      toast.error('User not authenticated');
-      return;
-    }
-    try {
-      const newProjectFromDB = await createProject(user.id, name);
-      toast.success('Project created successfully!');
+  // Chat messages query
+  const { data: chatMessages = [] } = useQuery({
+    queryKey: ['chatMessages', selectedComponentId],
+    queryFn: async () => {
+      const messages = await getChatMessages(selectedComponentId!);
+      return messages.map((msg: ChatMessageFromDB) => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+        timestamp: msg.created_at as Date,
+      }));
+    },
+    enabled: !!selectedComponentId,
+  });
+
+  // Mutations
+  const createProjectMutation = useMutation({
+    mutationFn: ({ userId, name }: { userId: string; name: string }) =>
+      createProject(userId, name),
+    onSuccess: (newProjectFromDB) => {
       if (!newProjectFromDB) {
         toast.error('Failed to create project');
         return;
       }
-      const newProject: Project = {
-        id: newProjectFromDB.id,
-        name,
-        createdAt: new Date(),
-      };
-      setProjects((prev) => [...prev, newProject]);
-      setSelectedProjectId(newProject.id);
-    } catch (error) {
-      toast.error((error as Error).message);
+      toast.success('Project created successfully!');
+      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
+      setSelectedProjectId(newProjectFromDB.id);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: deleteProject,
+    onSuccess: (_, projectId) => {
+      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
+      if (selectedProjectId === projectId) {
+        setSelectedProjectId(null);
+        setSelectedComponentId(null);
+        setCurrentVersionId(null);
+      }
+    },
+  });
+
+  const createComponentMutation = useMutation({
+    mutationFn: ({ projectId, name }: { projectId: string; name: string }) =>
+      createComponent(projectId, name),
+    onSuccess: (newComponentFromDB) => {
+      if (!newComponentFromDB) {
+        toast.error('Failed to create component');
+        return;
+      }
+      toast.success('Component created successfully!');
+      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
+      setSelectedComponentId(newComponentFromDB.id);
+      setCurrentVersionId(null);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteComponentMutation = useMutation({
+    mutationFn: deleteComponent,
+    onSuccess: (_, componentId) => {
+      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
+      if (selectedComponentId === componentId) {
+        setSelectedComponentId(null);
+        setCurrentVersionId(null);
+      }
+    },
+  });
+
+  // Project handlers
+  const handleCreateProject = (name: string) => {
+    if (!user) {
+      toast.error('User not authenticated');
       return;
     }
+    createProjectMutation.mutate({ userId: user.id, name });
   };
 
   const handleSelectProject = (projectId: string) => {
     setSelectedComponentId(null);
     setCurrentVersionId(null);
-    setChatMessages([]);
     setSelectedProjectId(projectId);
   };
 
-  const handleDeleteProject = async (projectId: string) => {
-    await deleteProject(projectId);
-    setProjects((prev) => prev.filter((p) => p.id !== projectId));
-    setComponents((prev) => prev.filter((c) => c.projectId !== projectId));
-
-    if (selectedProjectId === projectId) {
-      setSelectedProjectId(null);
-      setSelectedComponentId(null);
-      setCurrentVersionId(null);
-      setChatMessages([]);
-    }
+  const handleDeleteProject = (projectId: string) => {
+    deleteProjectMutation.mutate(projectId);
   };
 
   // Component handlers
-  const handleCreateComponent = async (name: string) => {
+  const handleCreateComponent = (name: string) => {
     if (!selectedProjectId) return;
-    try {
-      const newComponentFromDB = await createComponent(selectedProjectId, name);
-      toast.success('Component created successfully!');
-      if (!newComponentFromDB) {
-        toast.error('Failed to create component');
-        return;
-      }
-
-      const newComponent: Component = {
-        id: newComponentFromDB.id,
-        projectId: selectedProjectId,
-        name,
-        createdAt: new Date(),
-      };
-      setComponents((prev) => [...prev, newComponent]);
-      setSelectedComponentId(newComponent.id);
-      setCurrentVersionId(null);
-      setChatMessages([]);
-    } catch (error) {
-      toast.error((error as Error).message);
-      return;
-    }
-  };
-
-  const requestChatMessages = async (componentId: string) => {
-    setChatMessages([]);
-    await getChatMessages(componentId).then((messages: ChatMessageFromDB[]) => {
-      const formattedMessages: ChatMessage[] = messages.map((msg) => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content,
-        timestamp: msg.created_at as Date,
-      }));
-      setChatMessages(formattedMessages);
-    });
+    createComponentMutation.mutate({ projectId: selectedProjectId, name });
   };
 
   const handleSelectComponent = (componentId: string) => {
@@ -166,7 +234,6 @@ export default function App() {
     setMessageInputError(false);
     setMessageInput('');
     setSelectedComponentId(componentId);
-    requestChatMessages(componentId);
 
     if (
       currentVersionId === null ||
@@ -182,16 +249,8 @@ export default function App() {
     }
   };
 
-  const handleDeleteComponent = async (componentId: string) => {
-    await deleteComponent(componentId);
-    setComponents((prev) => prev.filter((c) => c.id !== componentId));
-    setVersions((prev) => prev.filter((v) => v.componentId !== componentId));
-
-    if (selectedComponentId === componentId) {
-      setSelectedComponentId(null);
-      setCurrentVersionId(null);
-      setChatMessages([]);
-    }
+  const handleDeleteComponent = (componentId: string) => {
+    deleteComponentMutation.mutate(componentId);
   };
 
   const handleSelectVersion = (versionId: string) => {
@@ -203,63 +262,8 @@ export default function App() {
     )?.componentId;
     if (selectedComponentId !== currentComponentId) {
       setSelectedComponentId(currentComponentId as string);
-      requestChatMessages(currentComponentId as string);
     }
   };
-
-  const supabase = createClient();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    fetchUser();
-  }, [supabase.auth]);
-
-  useEffect(() => {
-    if (!user) return;
-    getProject(user.id).then((projects: ProjectWithRelations[]) => {
-      const projectData: Project[] = projects.map((proj) => ({
-        id: proj.id,
-        name: proj.title,
-        createdAt: proj.created_at,
-      }));
-
-      const allComponents: Component[] = projects.flatMap((proj) =>
-        proj.project_components.map(
-          (pc: ProjectWithRelations['project_components'][number]) => ({
-            id: pc.id,
-            projectId: proj.id,
-            name: pc.title,
-            createdAt: pc.created_at as Date,
-          }),
-        ),
-      );
-
-      const allVersions: GeneratedComponent[] = projects.flatMap((proj) =>
-        proj.project_components.flatMap(
-          (pc: ProjectWithRelations['project_components'][number]) =>
-            pc.component_versions.map(
-              (
-                cv: ProjectWithRelations['project_components'][number]['component_versions'][number],
-              ) => ({
-                id: cv.id,
-                componentId: pc.id,
-                code: cv.generated_code,
-                timestamp: cv.created_at as Date,
-                prompt: cv.prompt,
-              }),
-            ),
-        ),
-      );
-      setProjects(projectData);
-      setComponents(allComponents);
-      setVersions(allVersions);
-    });
-  }, [user]);
 
   const handleGenerate = async (
     prompt: string,
@@ -267,12 +271,6 @@ export default function App() {
   ) => {
     setIsGenerating(true);
 
-    const userMessage: ChatMessage = {
-      role: 'user',
-      content: prompt,
-      timestamp: new Date(),
-    };
-    setChatMessages((prev) => [...prev, userMessage]);
     await createChatMessage(selectedComponentId as string, 'user', prompt);
 
     const response = JSON.parse(
@@ -306,16 +304,9 @@ export default function App() {
         refinedComponent,
       );
 
-      const newComponent: GeneratedComponent = {
-        id: version.id,
-        componentId: selectedComponentId as string,
-        code: refinedComponent,
-        timestamp: new Date(),
-        prompt: prompt,
-      };
-      setVersions((prev) => [...prev, newComponent]);
-      setCurrentVersionId(newComponent.id);
+      setCurrentVersionId(version.id);
       setRefinementSuggestions(response.actions || []);
+      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
     }
 
     await createChatMessage(
@@ -324,7 +315,7 @@ export default function App() {
       assistantMessage.content,
     );
 
-    setChatMessages((prev) => [...prev, assistantMessage]);
+    queryClient.invalidateQueries({ queryKey: ['chatMessages', selectedComponentId] });
     setIsGenerating(false);
   };
 
@@ -355,15 +346,8 @@ export default function App() {
       updatedCode,
     );
 
-    const newComponent: GeneratedComponent = {
-      id: version.id,
-      componentId: selectedComponentId as string,
-      code: updatedCode,
-      timestamp: new Date(),
-      prompt: messageInput,
-    };
-    setVersions((prev) => [...prev, newComponent]);
-    setCurrentVersionId(newComponent.id);
+    queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
+    setCurrentVersionId(version.id);
     setIsGenerating(false);
     setSaved(false);
     setMessageInput('');
