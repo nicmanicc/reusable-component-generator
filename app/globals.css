@@ -1,6 +1,7 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -122,4 +123,116 @@
     @apply bg-background text-foreground;
     @apply bg-background text-foreground;
   }
+}
+
+/* ── Landing page design tokens ── */
+@theme {
+  --font-dm-mono: 'DM Mono', monospace;
+  --font-dm-serif: 'DM Serif Display', serif;
+  --color-teal: #00c9a7;
+  --color-ink: #0d0d0d;
+  --color-mid: #6b6b6b;
+  --color-rule: #d8d4cb;
+  --color-parchment: #f7f5f0;
+  --animate-ca-blink: ca-blink 1.4s ease-in-out infinite;
+  --animate-ca-in-left: ca-in-left 0.6s ease forwards;
+  --animate-ca-in-up: ca-in-up 0.6s ease forwards;
+  --animate-ca-in-right: ca-in-right 0.65s ease forwards;
+}
+
+@keyframes ca-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+@keyframes ca-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes ca-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ca-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Crosshatch grid overlay */
+.lp-crosshatch::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      rgba(0, 0, 0, 0.028) 39px,
+      rgba(0, 0, 0, 0.028) 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 39px,
+      rgba(0, 0, 0, 0.028) 39px,
+      rgba(0, 0, 0, 0.028) 40px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Label trailing teal line */
+.lp-label-line::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #00c9a7;
+  opacity: 0.35;
+  max-width: 40px;
+}
+
+/* CTA teal slide-fill on hover */
+.lp-cta-slide {
+  position: relative;
+  overflow: hidden;
+  transition: color 0.22s;
+}
+.lp-cta-slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #00c9a7;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+.lp-cta-slide:hover::before {
+  transform: scaleX(1);
+}
+.lp-cta-slide:hover {
+  color: #0d0d0d;
 }
