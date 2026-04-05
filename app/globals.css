@@ -126,14 +126,32 @@
 }
 
 /* ── Landing page design tokens ── */
-@theme {
+:root {
+  --lp-parchment: #f7f5f0;
+  --lp-ink: #0d0d0d;
+  --lp-teal: #00c9a7;
+  --lp-mid: #6b6b6b;
+  --lp-rule: #d8d4cb;
+  --lp-cross: rgba(0, 0, 0, 0.028);
+}
+
+.dark {
+  --lp-parchment: #111111;
+  --lp-ink: #e8e4de;
+  --lp-teal: #00c9a7;
+  --lp-mid: #888888;
+  --lp-rule: #262626;
+  --lp-cross: rgba(255, 255, 255, 0.025);
+}
+
+@theme inline {
   --font-dm-mono: 'DM Mono', monospace;
   --font-dm-serif: 'DM Serif Display', serif;
-  --color-teal: #00c9a7;
-  --color-ink: #0d0d0d;
-  --color-mid: #6b6b6b;
-  --color-rule: #d8d4cb;
-  --color-parchment: #f7f5f0;
+  --color-teal: var(--lp-teal);
+  --color-ink: var(--lp-ink);
+  --color-mid: var(--lp-mid);
+  --color-rule: var(--lp-rule);
+  --color-parchment: var(--lp-parchment);
   --animate-ca-blink: ca-blink 1.4s ease-in-out infinite;
   --animate-ca-in-left: ca-in-left 0.6s ease forwards;
   --animate-ca-in-up: ca-in-up 0.6s ease forwards;
@@ -190,15 +208,15 @@
       0deg,
       transparent,
       transparent 39px,
-      rgba(0, 0, 0, 0.028) 39px,
-      rgba(0, 0, 0, 0.028) 40px
+      var(--lp-cross) 39px,
+      var(--lp-cross) 40px
     ),
     repeating-linear-gradient(
       90deg,
       transparent,
       transparent 39px,
-      rgba(0, 0, 0, 0.028) 39px,
-      rgba(0, 0, 0, 0.028) 40px
+      var(--lp-cross) 39px,
+      var(--lp-cross) 40px
     );
   pointer-events: none;
   z-index: 0;

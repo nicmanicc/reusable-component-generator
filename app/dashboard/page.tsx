@@ -29,6 +29,7 @@ import {
 } from '../components/TreeSideBar';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import ToggleThemeButton from '../components/ToggleThemeButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 type ProjectWithRelations = Awaited<ReturnType<typeof getProject>>[number];
@@ -408,6 +409,7 @@ export default function App() {
               {user?.user_metadata?.full_name || user?.email}
             </p>
           </div>
+          <ToggleThemeButton />
           <button
             onClick={() => signout()}
             className="font-dm-mono text-[0.65rem] tracking-widest uppercase text-mid hover:text-ink flex items-center gap-1.5 bg-transparent border-none cursor-pointer transition-colors"
@@ -490,7 +492,7 @@ export default function App() {
                       externalResources: ['https://cdn.tailwindcss.com'],
                     }}
                     files={sandpackFiles}
-                    theme={theme ? 'dark' : 'light'}
+                    theme={theme === 'dark' ? 'dark' : 'light'}
                   >
                     <ComponentPreview code={currentVersion.code} />
                     <CodeViewer

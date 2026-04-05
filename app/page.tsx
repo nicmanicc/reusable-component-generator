@@ -1,5 +1,6 @@
 ﻿'use client';
 import { useRouter } from 'next/navigation';
+import ToggleThemeButton from './components/ToggleThemeButton';
 
 const steps = [
   { n: '— 01', title: 'Describe', desc: 'Plain English. No boilerplate.' },
@@ -25,6 +26,7 @@ export default function LandingPage() {
           >
             Sign in
           </button>
+          <ToggleThemeButton />
           <button
             className="font-dm-mono text-[0.7rem] font-medium tracking-[0.12em] uppercase bg-ink text-parchment px-5 py-2 cursor-pointer hover:bg-teal hover:text-ink transition-all"
             onClick={() => router.push('/auth/login')}

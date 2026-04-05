@@ -6,6 +6,7 @@ import { AuthProviderSignIn } from '../components/AuthProviderSignIn';
 import { signInWithGoogle, signInWithGithub, login } from '@/lib/auth-actions';
 import { authErrorMessageFromCode } from '@/lib/auth/errors';
 import { useRouter } from 'next/navigation';
+import ToggleThemeButton from '../../components/ToggleThemeButton';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -47,6 +48,7 @@ export default function SignIn() {
           <span className="font-dm-mono text-[0.7rem] tracking-widest text-mid">
             New here?
           </span>
+          <ToggleThemeButton />
           <button
             className="font-dm-mono text-[0.7rem] font-medium tracking-[0.12em] uppercase bg-ink text-parchment px-5 py-2 cursor-pointer hover:bg-teal hover:text-ink transition-all"
             onClick={() => router.push('/auth/signup')}

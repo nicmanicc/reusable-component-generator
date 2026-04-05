@@ -13,21 +13,21 @@ export default function ToggleThemeButton() {
     () => false,
   );
 
+  const isDarkMode = theme === 'dark';
+
   const toggleDarkMode = () => {
     setTheme(isDarkMode ? 'light' : 'dark');
   };
 
   if (!mounted) return null;
 
-  const isDarkMode = theme === 'dark';
-
   return (
     <button
       onClick={toggleDarkMode}
-      className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+      className="text-mid hover:text-ink transition-colors bg-transparent border-none cursor-pointer p-0"
       title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
     </button>
   );
 }
