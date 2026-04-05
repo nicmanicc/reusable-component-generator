@@ -38,7 +38,7 @@ export default function LandingPage() {
 
       {/* Main */}
       <main className="relative z-10 flex-1 flex items-center">
-        <div className="max-w-2xl mx-auto w-full px-10 max-md:px-6 py-16 flex flex-col">
+        <div className="max-w-2/3 mx-auto w-full px-10 max-md:px-6 py-16 flex flex-col">
           <div className="opacity-0 animate-ca-in-left [animation-delay:0.05s] text-[0.62rem] tracking-[0.28em] uppercase text-teal mb-5.5 flex items-center gap-2.5 lp-label-line">
             AI Component Generator
           </div>
