@@ -1,14 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { AuthProviderSignIn } from '../components/AuthProviderSignIn';
-import { signInWithGoogle, signInWithGithub } from '@/lib/auth-actions';
-import { signup } from '@/lib/auth-actions';
+import { signInWithGoogle, signInWithGithub, signup } from '@/lib/auth-actions';
 import { useRouter } from 'next/navigation';
 import { authErrorMessageFromCode } from '@/lib/auth/errors';
-import InputWrapper from '@/app/components/InputWrapper';
 
 export default function SignUp() {
   const [name, setName] = useState('');
@@ -40,7 +37,10 @@ export default function SignUp() {
 
     const response = await signup(formData);
     if (response.error.code) {
-      setError(authErrorMessageFromCode(response.error.code) ?? 'Unable to create account.');
+      setError(
+        authErrorMessageFromCode(response.error.code) ??
+          'Unable to create account.',
+      );
       setIsLoading(false);
       return;
     }
@@ -50,22 +50,59 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        {/* Logo & Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-linear-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4">
-            <Sparkles className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-slate-900 dark:text-white mb-2">Create Account</h1>
-          <p className="text-slate-600 dark:text-slate-400">Start generating AI-powered components</p>
-        </div>
+    <div className="relative font-dm-mono bg-parchment text-ink min-h-dvh flex flex-col overflow-x-hidden lp-crosshatch">
+      {/* Header */}
+      <header className="relative z-10 flex items-center justify-between px-10 max-md:px-6 h-13 border-b border-rule">
+        <button
+          className="font-dm-mono text-[0.78rem] font-medium tracking-[0.22em] uppercase text-ink flex items-center gap-2.5 bg-transparent border-none p-0 cursor-pointer hover:text-teal transition-colors"
+          onClick={() => router.push('/')}
+        >
+          <span className="text-teal text-[1.05rem]">[/]</span>
+          ShareUI
+        </button>
+        <nav className="flex items-center gap-6">
+          <span className="font-dm-mono text-[0.7rem] tracking-widest text-mid">
+            Have an account?
+          </span>
+          <button
+            className="font-dm-mono text-[0.7rem] font-medium tracking-[0.12em] uppercase bg-ink text-parchment px-5 py-2 cursor-pointer hover:bg-teal hover:text-ink transition-all"
+            onClick={() => router.push('/auth/login')}
+          >
+            Sign in
+          </button>
+        </nav>
+      </header>
 
-        {/* Sign Up Form */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name Input */}
-            <InputWrapper icon={User} label="Full Name" labelFor="name">
+      {/* Main */}
+      <main className="relative z-10 flex-1 flex items-center justify-center">
+        <div className="w-full max-w-sm px-10 max-md:px-6 py-12">
+          {/* Eyebrow */}
+          <div className="opacity-0 animate-ca-in-left [animation-delay:0.05s] text-[0.62rem] tracking-[0.28em] uppercase text-teal mb-5 flex items-center gap-2.5 lp-label-line">
+            New account
+          </div>
+
+          {/* Title */}
+          <h1 className="opacity-0 animate-ca-in-left [animation-delay:0.15s] font-dm-serif text-[clamp(2rem,4vw,2.8rem)] leading-[1.05] font-normal text-ink tracking-[-0.02em]">
+            Start
+            <br />
+            <span className="italic text-teal">building.</span>
+          </h1>
+
+          <div className="opacity-0 animate-ca-in-up [animation-delay:0.25s] border-t border-rule mt-6 mb-7" />
+
+          {/* Form */}
+          <form
+            onSubmit={handleSubmit}
+            className="opacity-0 animate-ca-in-up [animation-delay:0.3s] flex flex-col gap-4"
+          >
+            {/* Name */}
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-[0.6rem] tracking-[0.22em] uppercase text-mid mb-1.5"
+              >
+                Full name
+              </label>
               <input
                 id="name"
                 name="name"
@@ -73,13 +110,19 @@ export default function SignUp() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
-                className="w-full pl-11 pr-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full border border-rule bg-transparent text-ink font-dm-mono text-[0.82rem] px-3.5 py-2.5 focus:outline-none focus:border-teal transition-colors placeholder:text-mid/40"
                 required
               />
-            </InputWrapper>
+            </div>
 
-            {/* Email Input */}
-            <InputWrapper icon={Mail} label="Email" labelFor="email">
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-[0.6rem] tracking-[0.22em] uppercase text-mid mb-1.5"
+              >
+                Email address
+              </label>
               <input
                 id="email"
                 name="email"
@@ -87,13 +130,19 @@ export default function SignUp() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full pl-11 pr-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full border border-rule bg-transparent text-ink font-dm-mono text-[0.82rem] px-3.5 py-2.5 focus:outline-none focus:border-teal transition-colors placeholder:text-mid/40"
                 required
               />
-            </InputWrapper>
+            </div>
 
-            {/* Password Input */}
-            <InputWrapper icon={Lock} label="Password" labelFor="password">
+            {/* Password */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-[0.6rem] tracking-[0.22em] uppercase text-mid mb-1.5"
+              >
+                Password
+              </label>
               <input
                 id="password"
                 name="password"
@@ -101,13 +150,19 @@ export default function SignUp() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-11 pr-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full border border-rule bg-transparent text-ink font-dm-mono text-[0.82rem] px-3.5 py-2.5 focus:outline-none focus:border-teal transition-colors placeholder:text-mid/40"
                 required
               />
-            </InputWrapper>
+            </div>
 
-            {/* Confirm Password Input */}
-            <InputWrapper icon={Lock} label="Confirm Password" labelFor="confirmPassword">
+            {/* Confirm Password */}
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-[0.6rem] tracking-[0.22em] uppercase text-mid mb-1.5"
+              >
+                Confirm password
+              </label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -115,52 +170,41 @@ export default function SignUp() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-11 pr-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full border border-rule bg-transparent text-ink font-dm-mono text-[0.82rem] px-3.5 py-2.5 focus:outline-none focus:border-teal transition-colors placeholder:text-mid/40"
                 required
               />
-            </InputWrapper>
+            </div>
 
-            {/* Error Message */}
+            {/* Error */}
             {error && (
-              <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-              </div>
+              <p className="text-[0.65rem] tracking-[0.08em] text-red-500">
+                {error}
+              </p>
             )}
 
-            {/* Submit Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-6 py-3 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="lp-cta-slide font-dm-mono text-[0.72rem] font-medium tracking-[0.14em] uppercase bg-ink text-parchment px-7.5 py-3.25 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-1 w-full"
             >
-              {isLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Creating account...</span>
-                </>
-              ) : (
-                <>
-                  <span>Create Account</span>
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
+              <span className="relative z-1">
+                {isLoading ? 'Creating account…' : 'Create account →'}
+              </span>
             </button>
           </form>
 
           {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400">
-                Or continue with
-              </span>
-            </div>
+          <div className="opacity-0 animate-ca-in-up [animation-delay:0.45s] flex items-center gap-4 my-6">
+            <div className="flex-1 h-px bg-rule" />
+            <span className="text-[0.58rem] tracking-[0.2em] uppercase text-mid">
+              or
+            </span>
+            <div className="flex-1 h-px bg-rule" />
           </div>
 
-          {/* Social Sign Up */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Social */}
+          <div className="opacity-0 animate-ca-in-up [animation-delay:0.55s] grid grid-cols-2 gap-3">
             <AuthProviderSignIn
               AuthProviderFunc={signInWithGoogle}
               AuthProviderName="Google"
@@ -170,19 +214,32 @@ export default function SignUp() {
               AuthProviderName="GitHub"
             />
           </div>
-        </div>
 
-        {/* Sign In Link */}
-        <p className="text-center mt-6 text-slate-600 dark:text-slate-400">
-          Already have an account?{' '}
-          <Link
-            href="/auth/login"
-            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
-          >
-            Sign in
-          </Link>
-        </p>
-      </div>
+          {/* Sign in link */}
+          <p className="opacity-0 animate-ca-in-up [animation-delay:0.65s] text-[0.62rem] tracking-[0.08em] text-mid text-center mt-7">
+            Already have an account?{' '}
+            <Link
+              href="/auth/login"
+              className="text-teal hover:text-ink transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-rule px-10 max-md:px-6 h-11 flex items-center justify-between">
+        <span className="text-[0.6rem] tracking-[0.12em] text-mid">
+          © 2026 ShareUI · Built for developers
+        </span>
+        <div className="flex items-center gap-5">
+          <span className="text-[0.6rem] tracking-[0.12em] text-mid">v1.0</span>
+          <span className="text-[0.6rem] tracking-[0.12em] text-teal">
+            ● All systems normal
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
