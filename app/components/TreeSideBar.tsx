@@ -322,7 +322,7 @@ export function TreeSidebar({
                               onChange={(e) => {
                                 setNewItemName(e.target.value);
                                 if (e.target.value.trim()) {
-                                  const duplicate = components.find(
+                                  const duplicate = projectComponents.find(
                                     (c) =>
                                       c.name.toLowerCase() ===
                                       e.target.value.trim().toLowerCase(),

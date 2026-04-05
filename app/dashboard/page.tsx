@@ -12,11 +12,7 @@ import { generateComponent } from '../actions/generateComponent';
 import { signout } from '@/lib/auth-actions';
 import { createClient } from '@/utils/supabase/client';
 import {
-  createComponent,
   getProject,
-  createProject,
-  deleteProject,
-  deleteComponent,
   createVersion,
   createChatMessage,
   getChatMessages,
@@ -29,8 +25,9 @@ import {
 } from '../components/TreeSideBar';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useDashboardMutations } from './hooks/useDashboardMutations';
 import ToggleThemeButton from '../components/ToggleThemeButton';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 type ProjectWithRelations = Awaited<ReturnType<typeof getProject>>[number];
 type ChatMessageFromDB = Awaited<ReturnType<typeof getChatMessages>>[number];
@@ -147,63 +144,18 @@ export default function App() {
     enabled: !!selectedComponentId,
   });
 
-  // Mutations
-  const createProjectMutation = useMutation({
-    mutationFn: ({ userId, name }: { userId: string; name: string }) =>
-      createProject(userId, name),
-    onSuccess: (newProjectFromDB) => {
-      if (!newProjectFromDB) {
-        toast.error('Failed to create project');
-        return;
-      }
-      toast.success('Project created successfully!');
-      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
-      setSelectedProjectId(newProjectFromDB.id);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const deleteProjectMutation = useMutation({
-    mutationFn: deleteProject,
-    onSuccess: (_, projectId) => {
-      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
-      if (selectedProjectId === projectId) {
-        setSelectedProjectId(null);
-        setSelectedComponentId(null);
-        setCurrentVersionId(null);
-      }
-    },
-  });
-
-  const createComponentMutation = useMutation({
-    mutationFn: ({ projectId, name }: { projectId: string; name: string }) =>
-      createComponent(projectId, name),
-    onSuccess: (newComponentFromDB) => {
-      if (!newComponentFromDB) {
-        toast.error('Failed to create component');
-        return;
-      }
-      toast.success('Component created successfully!');
-      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
-      setSelectedComponentId(newComponentFromDB.id);
-      setCurrentVersionId(null);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const deleteComponentMutation = useMutation({
-    mutationFn: deleteComponent,
-    onSuccess: (_, componentId) => {
-      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
-      if (selectedComponentId === componentId) {
-        setSelectedComponentId(null);
-        setCurrentVersionId(null);
-      }
-    },
+  const {
+    createProjectMutation,
+    deleteProjectMutation,
+    createComponentMutation,
+    deleteComponentMutation,
+  } = useDashboardMutations({
+    userId: user?.id,
+    selectedProjectId,
+    selectedComponentId,
+    setSelectedProjectId,
+    setSelectedComponentId,
+    setCurrentVersionId,
   });
 
   // Project handlers
