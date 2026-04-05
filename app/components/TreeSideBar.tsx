@@ -10,7 +10,7 @@ import {
   Trash2,
   Clock,
   Circle,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
 
 export interface Project {
@@ -64,12 +64,20 @@ export function TreeSidebar({
   onDeleteProject,
   onDeleteComponent,
 }: TreeSidebarProps) {
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
-  const [expandedComponents, setExpandedComponents] = useState<Set<string>>(new Set());
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+    new Set(),
+  );
+  const [expandedComponents, setExpandedComponents] = useState<Set<string>>(
+    new Set(),
+  );
   const [isCreatingProject, setIsCreatingProject] = useState(false);
-  const [creatingComponentForProject, setCreatingComponentForProject] = useState<string | null>(null);
+  const [creatingComponentForProject, setCreatingComponentForProject] =
+    useState<string | null>(null);
   const [newItemName, setNewItemName] = useState('');
-  const [menuOpen, setMenuOpen] = useState<{ type: 'project' | 'component'; id: string } | null>(null);
+  const [menuOpen, setMenuOpen] = useState<{
+    type: 'project' | 'component';
+    id: string;
+  } | null>(null);
   const [disabled, setDisabled] = useState(false);
   const [projectDuplicate, setProjectDuplicate] = useState(false);
 
@@ -125,16 +133,18 @@ export function TreeSidebar({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 h-full flex flex-col">
+    <div className="bg-parchment border-r border-rule h-full flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <h3 className="text-sm text-slate-900 dark:text-white uppercase tracking-wider">Explorer</h3>
+      <div className="px-4 py-3 border-b border-rule flex items-center justify-between">
+        <span className="text-[0.58rem] tracking-[0.22em] uppercase text-mid font-medium">
+          Explorer
+        </span>
         <button
           onClick={() => setIsCreatingProject(true)}
-          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
+          className="p-1 hover:text-teal transition-colors text-mid bg-transparent border-none cursor-pointer"
           title="New project"
         >
-          <Plus className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+          <Plus className="w-4 h-4" />
         </button>
       </div>
 
@@ -145,17 +155,24 @@ export function TreeSidebar({
           <form onSubmit={handleCreateProject} className="px-2 py-2">
             <div className="flex items-center flex-wrap gap-1 pl-0">
               <div className="w-full">
-                {projectDuplicate && <span className="text-red-500 text-xs block">Duplicate name</span>}
-
+                {projectDuplicate && (
+                  <span className="text-red-500 text-xs block">
+                    Duplicate name
+                  </span>
+                )}
               </div>
-              <Folder className="w-4 h-4 text-slate-400 shrink-0" />
+              <Folder className="w-4 h-4 text-mid shrink-0" />
               <input
                 type="text"
                 value={newItemName}
                 onChange={(e) => {
                   setNewItemName(e.target.value);
                   if (e.target.value.trim()) {
-                    const duplicate = projects.find(p => p.name.toLowerCase() === e.target.value.trim().toLowerCase());
+                    const duplicate = projects.find(
+                      (p) =>
+                        p.name.toLowerCase() ===
+                        e.target.value.trim().toLowerCase(),
+                    );
                     setProjectDuplicate(!!duplicate);
                   } else {
                     setProjectDuplicate(false);
@@ -163,7 +180,7 @@ export function TreeSidebar({
                 }}
                 placeholder="Project name..."
                 autoFocus
-                className={`flex-1 px-2 py-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded border ${projectDuplicate ? 'border-red-500' : 'border-indigo-500'} focus:outline-none`}
+                className={`flex-1 px-2 py-1 text-[0.72rem] font-dm-mono bg-parchment text-ink border ${projectDuplicate ? 'border-red-500' : 'border-teal'} focus:outline-none`}
                 onBlur={() => {
                   if (!newItemName.trim()) {
                     setIsCreatingProject(false);
@@ -177,13 +194,15 @@ export function TreeSidebar({
         {/* Projects List */}
         {projects.length === 0 && !isCreatingProject ? (
           <div className="px-4 py-8 text-center">
-            <FolderOpen className="w-8 h-8 mx-auto mb-2 text-slate-300 dark:text-slate-600" />
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">No projects yet</p>
+            <FolderOpen className="w-8 h-8 mx-auto mb-2 text-rule" />
+            <p className="text-[0.68rem] tracking-widest text-mid mb-2">
+              No projects yet
+            </p>
             <button
               onClick={() => setIsCreatingProject(true)}
-              className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+              className="text-[0.62rem] tracking-widest uppercase text-teal hover:text-ink transition-colors bg-transparent border-none cursor-pointer"
             >
-              Create your first project
+              Create first project
             </button>
           </div>
         ) : (
@@ -191,81 +210,91 @@ export function TreeSidebar({
             {projects.map((project) => {
               const isExpanded = expandedProjects.has(project.id);
               const isSelected = project.id === selectedProjectId;
-              const projectComponents = components.filter(c => c.projectId === project.id);
+              const projectComponents = components.filter(
+                (c) => c.projectId === project.id,
+              );
               const componentCount = projectComponents.length;
 
               return (
                 <div key={project.id}>
                   {/* Project Row */}
                   <div
-                    className={`group flex items-center gap-1 px-2 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer ${isSelected ? 'bg-slate-100 dark:bg-slate-800' : ''
-                      }`}
+                    className={`group flex items-center gap-1 px-2 py-1.5 hover:bg-teal/5 cursor-pointer border-l-2 transition-colors ${
+                      isSelected
+                        ? 'border-teal bg-teal/5'
+                        : 'border-transparent'
+                    }`}
                   >
                     <button
                       onClick={() => toggleProject(project.id)}
-                      className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
+                      className="p-0.5 hover:text-teal transition-colors text-mid bg-transparent border-none cursor-pointer"
                     >
                       {isExpanded ? (
-                        <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                        <ChevronDown className="w-4 h-4" />
                       ) : (
-                        <ChevronRight className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                        <ChevronRight className="w-4 h-4" />
                       )}
                     </button>
                     {isExpanded ? (
-                      <FolderOpen className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <FolderOpen className="w-4 h-4 text-teal shrink-0" />
                     ) : (
-                      <Folder className="w-4 h-4 text-slate-400 shrink-0" />
+                      <Folder className="w-4 h-4 text-mid shrink-0" />
                     )}
                     <span
                       onClick={() => {
                         onSelectProject(project.id);
                         if (!isExpanded) toggleProject(project.id);
                       }}
-                      className="flex-1 text-sm text-slate-900 dark:text-white truncate"
+                      className="flex-1 text-[0.75rem] font-dm-mono text-ink truncate"
                     >
                       {project.name}
                     </span>
-                    <span className="text-xs text-slate-400 dark:text-slate-500 mr-1">
+                    <span className="text-[0.6rem] text-mid mr-1">
                       {componentCount}
                     </span>
                     <div className="relative">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setMenuOpen(menuOpen?.id === project.id ? null : { type: 'project', id: project.id });
+                          setMenuOpen(
+                            menuOpen?.id === project.id
+                              ? null
+                              : { type: 'project', id: project.id },
+                          );
                         }}
-                        className="p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-all"
+                        className="p-1 opacity-0 group-hover:opacity-100 hover:text-teal transition-all text-mid bg-transparent border-none cursor-pointer"
                       >
-                        <MoreVertical className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+                        <MoreVertical className="w-3 h-3" />
                       </button>
-                      {menuOpen?.type === 'project' && menuOpen.id === project.id && (
-                        <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg py-1 z-20">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setCreatingComponentForProject(project.id);
-                              onSelectProject(project.id);
-                              if (!isExpanded) toggleProject(project.id);
-                              setMenuOpen(null);
-                            }}
-                            className="w-full px-3 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                          >
-                            <Plus className="w-3 h-3" />
-                            New Component
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDeleteProject(project.id);
-                              setMenuOpen(null);
-                            }}
-                            className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                      {menuOpen?.type === 'project' &&
+                        menuOpen.id === project.id && (
+                          <div className="absolute right-0 top-full mt-1 w-40 bg-parchment border border-rule shadow-md py-1 z-20">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCreatingComponentForProject(project.id);
+                                onSelectProject(project.id);
+                                if (!isExpanded) toggleProject(project.id);
+                                setMenuOpen(null);
+                              }}
+                              className="w-full px-3 py-2 text-left text-[0.68rem] font-dm-mono tracking-wide text-ink hover:bg-teal/5 hover:text-teal flex items-center gap-2 bg-transparent border-none cursor-pointer"
+                            >
+                              <Plus className="w-3 h-3" />
+                              New Component
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteProject(project.id);
+                                setMenuOpen(null);
+                              }}
+                              className="w-full px-3 py-2 text-left text-[0.68rem] font-dm-mono tracking-wide text-red-600 hover:bg-red-50 flex items-center gap-2 bg-transparent border-none cursor-pointer"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Delete
+                            </button>
+                          </div>
+                        )}
                     </div>
                   </div>
 
@@ -274,20 +303,30 @@ export function TreeSidebar({
                     <div className="ml-4">
                       {/* New Component Form */}
                       {creatingComponentForProject === project.id && (
-                        <form onSubmit={handleCreateComponent} className="px-2 py-1.5">
+                        <form
+                          onSubmit={handleCreateComponent}
+                          className="px-2 py-1.5"
+                        >
                           <div className="flex items-center flex-wrap gap-1 pl-4">
                             <div className="w-full">
-                              {disabled && <span className="text-red-500 text-xs block">Duplicate name</span>}
-
+                              {disabled && (
+                                <span className="text-red-500 text-xs block">
+                                  Duplicate name
+                                </span>
+                              )}
                             </div>
-                            <Box className="w-4 h-4 text-slate-400 shrink-0" />
+                            <Box className="w-4 h-4 text-mid shrink-0" />
                             <input
                               type="text"
                               value={newItemName}
                               onChange={(e) => {
-                                setNewItemName(e.target.value)
+                                setNewItemName(e.target.value);
                                 if (e.target.value.trim()) {
-                                  const duplicate = components.find(c => c.name.toLowerCase() === e.target.value.trim().toLowerCase());
+                                  const duplicate = components.find(
+                                    (c) =>
+                                      c.name.toLowerCase() ===
+                                      e.target.value.trim().toLowerCase(),
+                                  );
                                   setDisabled(!!duplicate);
                                 } else {
                                   setDisabled(false);
@@ -295,7 +334,7 @@ export function TreeSidebar({
                               }}
                               placeholder="Component name..."
                               autoFocus
-                              className={`flex-1 px-2 py-1 text-sm bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded border border-indigo-500 focus:outline-none ${disabled ? 'border-red-500' : ''}`}
+                              className={`flex-1 px-2 py-1 text-[0.72rem] font-dm-mono bg-parchment text-ink border border-teal focus:outline-none ${disabled ? 'border-red-500' : ''}`}
                               onBlur={() => {
                                 if (!newItemName.trim()) {
                                   setCreatingComponentForProject(null);
@@ -306,73 +345,94 @@ export function TreeSidebar({
                         </form>
                       )}
 
-                      {projectComponents.length === 0 && creatingComponentForProject !== project.id ? (
-                        <div className="px-2 py-2 pl-8 text-xs text-slate-400 dark:text-slate-500 italic">
+                      {projectComponents.length === 0 &&
+                      creatingComponentForProject !== project.id ? (
+                        <div className="px-2 py-2 pl-8 text-[0.6rem] tracking-wide text-mid italic">
                           No components
                         </div>
                       ) : (
                         projectComponents.map((component) => {
-                          const isComponentExpanded = expandedComponents.has(component.id);
-                          const isComponentSelected = component.id === selectedComponentId;
-                          const componentVersions = versions.filter(v => v.componentId === component.id);
+                          const isComponentExpanded = expandedComponents.has(
+                            component.id,
+                          );
+                          const isComponentSelected =
+                            component.id === selectedComponentId;
+                          const componentVersions = versions.filter(
+                            (v) => v.componentId === component.id,
+                          );
                           const versionCount = componentVersions.length;
 
                           return (
                             <div key={component.id}>
                               {/* Component Row */}
                               <div
-                                className={`group flex items-center gap-1 px-2 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer ${isComponentSelected ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''
-                                  }`}
+                                className={`group flex items-center gap-1 px-2 py-1.5 hover:bg-teal/5 cursor-pointer border-l-2 transition-colors ml-4 ${
+                                  isComponentSelected
+                                    ? 'border-teal bg-teal/5'
+                                    : 'border-transparent'
+                                }`}
                               >
                                 <button
                                   onClick={() => toggleComponent(component.id)}
-                                  className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
+                                  className="p-0.5 hover:text-teal transition-colors text-mid bg-transparent border-none cursor-pointer"
                                 >
                                   {isComponentExpanded ? (
-                                    <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                                    <ChevronDown className="w-4 h-4" />
                                   ) : (
-                                    <ChevronRight className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                                    <ChevronRight className="w-4 h-4" />
                                   )}
                                 </button>
-                                <Box className="w-4 h-4 text-blue-500 shrink-0" />
+                                <Box className="w-4 h-4 text-teal shrink-0" />
                                 <span
                                   onClick={() => {
                                     onSelectComponent(component.id);
-                                    if (!isComponentExpanded) toggleComponent(component.id);
+                                    if (!isComponentExpanded)
+                                      toggleComponent(component.id);
                                   }}
-                                  className={`flex-1 text-sm truncate ${isComponentSelected ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-900 dark:text-white'
-                                    }`}
+                                  className={`flex-1 text-[0.75rem] font-dm-mono truncate ${
+                                    isComponentSelected
+                                      ? 'text-teal'
+                                      : 'text-ink'
+                                  }`}
                                 >
                                   {component.name}
                                 </span>
-                                <span className="text-xs text-slate-400 dark:text-slate-500 mr-1">
+                                <span className="text-[0.6rem] text-mid mr-1">
                                   {versionCount}
                                 </span>
                                 <div className="relative">
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setMenuOpen(menuOpen?.id === component.id ? null : { type: 'component', id: component.id });
+                                      setMenuOpen(
+                                        menuOpen?.id === component.id
+                                          ? null
+                                          : {
+                                              type: 'component',
+                                              id: component.id,
+                                            },
+                                      );
                                     }}
-                                    className="p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-all"
+                                    className="p-1 opacity-0 group-hover:opacity-100 hover:text-teal transition-all text-mid bg-transparent border-none cursor-pointer"
                                   >
-                                    <MoreVertical className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+                                    <MoreVertical className="w-3 h-3" />
                                   </button>
-                                  {menuOpen?.type === 'component' && menuOpen.id === component.id && (
-                                    <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg py-1 z-20">
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onDeleteComponent(component.id);
-                                          setMenuOpen(null);
-                                        }}
-                                        className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                        Delete
-                                      </button>
-                                    </div>
-                                  )}
+                                  {menuOpen?.type === 'component' &&
+                                    menuOpen.id === component.id && (
+                                      <div className="absolute right-0 top-full mt-1 w-32 bg-parchment border border-rule shadow-md py-1 z-20">
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDeleteComponent(component.id);
+                                            setMenuOpen(null);
+                                          }}
+                                          className="w-full px-3 py-2 text-left text-[0.68rem] font-dm-mono tracking-wide text-red-600 hover:bg-red-50 flex items-center gap-2 bg-transparent border-none cursor-pointer"
+                                        >
+                                          <Trash2 className="w-3 h-3" />
+                                          Delete
+                                        </button>
+                                      </div>
+                                    )}
                                 </div>
                               </div>
 
@@ -380,42 +440,53 @@ export function TreeSidebar({
                               {isComponentExpanded && (
                                 <div className="ml-8">
                                   {componentVersions.length === 0 ? (
-                                    <div className="px-2 py-2 pl-4 text-xs text-slate-400 dark:text-slate-500 italic">
+                                    <div className="px-2 py-2 pl-4 text-[0.6rem] tracking-wide text-mid italic">
                                       No versions
                                     </div>
                                   ) : (
-                                    [...componentVersions].reverse().map((version, index) => {
-                                      const isVersionSelected = version.id === selectedVersionId;
-                                      const versionNumber = componentVersions.length - index;
+                                    [...componentVersions]
+                                      .reverse()
+                                      .map((version, index) => {
+                                        const isVersionSelected =
+                                          version.id === selectedVersionId;
+                                        const versionNumber =
+                                          componentVersions.length - index;
 
-                                      return (
-                                        <div
-                                          key={version.id}
-                                          onClick={() => onSelectVersion(version.id)}
-                                          className={`group flex items-center gap-2 px-2 py-1.5 pl-4 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer ${isVersionSelected ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''
+                                        return (
+                                          <div
+                                            key={version.id}
+                                            onClick={() =>
+                                              onSelectVersion(version.id)
+                                            }
+                                            className={`group flex items-center gap-2 px-2 py-1.5 pl-4 hover:bg-teal/5 cursor-pointer border-l-2 transition-colors ml-8 ${
+                                              isVersionSelected
+                                                ? 'border-teal bg-teal/5'
+                                                : 'border-transparent'
                                             }`}
-                                        >
-                                          {isVersionSelected ? (
-                                            <CheckCircle2 className="w-3 h-3 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                                          ) : (
-                                            <Circle className="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" />
-                                          )}
-                                          <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2">
-                                              <span className="text-xs text-slate-500 dark:text-slate-400">
-                                                v{versionNumber}
-                                              </span>
-                                              <span className="text-xs text-slate-400 dark:text-slate-500">
-                                                {formatTime(version.timestamp)}
-                                              </span>
+                                          >
+                                            {isVersionSelected ? (
+                                              <CheckCircle2 className="w-3 h-3 text-teal shrink-0" />
+                                            ) : (
+                                              <Circle className="w-3 h-3 text-rule shrink-0" />
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-[0.58rem] text-teal">
+                                                  v{versionNumber}
+                                                </span>
+                                                <span className="text-[0.58rem] text-mid">
+                                                  {formatTime(
+                                                    version.timestamp,
+                                                  )}
+                                                </span>
+                                              </div>
+                                              <p className="text-[0.65rem] font-dm-mono text-mid truncate">
+                                                {version.prompt}
+                                              </p>
                                             </div>
-                                            <p className="text-xs text-slate-600 dark:text-slate-300 truncate">
-                                              {version.prompt}
-                                            </p>
                                           </div>
-                                        </div>
-                                      );
-                                    })
+                                        );
+                                      })
                                   )}
                                 </div>
                               )}

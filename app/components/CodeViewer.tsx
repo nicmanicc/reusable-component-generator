@@ -6,7 +6,7 @@ import {
   useActiveCode,
   SandpackLayout,
   SandpackCodeEditor,
-} from "@codesandbox/sandpack-react";
+} from '@codesandbox/sandpack-react';
 import Header from './Header';
 
 interface CodeViewerProps {
@@ -18,7 +18,14 @@ interface CodeViewerProps {
   saved: boolean;
 }
 
-export function CodeViewer({ onCodeChanged, handleSave, setMessageInput, messageInput, messageInputError, saved }: CodeViewerProps) {
+export function CodeViewer({
+  onCodeChanged,
+  handleSave,
+  setMessageInput,
+  messageInput,
+  messageInputError,
+  saved,
+}: CodeViewerProps) {
   const [copied, setCopied] = useState(false);
   const { code: activeCode } = useActiveCode();
 
@@ -33,32 +40,38 @@ export function CodeViewer({ onCodeChanged, handleSave, setMessageInput, message
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl my-6 shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+    <div className="bg-parchment border border-rule overflow-hidden my-4">
       {/* Header */}
       <Header title="Generated Code" icon={Code}>
-        <div className='flex gap-x-6'>
-          <input onChange={(e) => setMessageInput(e.target.value)} value={messageInput} type='text' name='promptMessage' placeholder='Message:' className={`rounded-lg border px-3 py-1 text-sm text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-700 ${messageInputError ? 'border-red-500 dark:border-red-600' : 'border-slate-300 dark:border-slate-600'}`} />
-          <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded-lg hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors text-sm">
-
-            {saved ? <><Save className="w-4 h-4" />
-              <span>Saved!</span></> : <>
-              <Save className="w-4 h-4" />
-              <span>Save Changes</span>
-            </>}
+        <div className="flex gap-4 items-center">
+          <input
+            onChange={(e) => setMessageInput(e.target.value)}
+            value={messageInput}
+            type="text"
+            name="promptMessage"
+            placeholder="Save message"
+            className={`border px-3 py-1.5 text-[0.72rem] font-dm-mono bg-parchment text-ink focus:outline-none focus:border-teal transition-colors ${messageInputError ? 'border-red-500' : 'border-rule'}`}
+          />
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-ink text-parchment font-dm-mono text-[0.65rem] tracking-widest uppercase hover:bg-teal hover:text-ink transition-all cursor-pointer border-none"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>{saved ? 'Saved!' : 'Save'}</span>
           </button>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 dark:bg-slate-700 text-white rounded-lg hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors text-sm"
+            className="flex items-center gap-1.5 px-4 py-1.5 border border-rule font-dm-mono text-[0.65rem] tracking-widest uppercase text-mid hover:border-teal hover:text-ink transition-all cursor-pointer bg-transparent"
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4" />
-                <span>Copied!</span>
+                <Check className="w-3.5 h-3.5" />
+                <span>Copied</span>
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4" />
-                <span>Copy Code</span>
+                <Copy className="w-3.5 h-3.5" />
+                <span>Copy</span>
               </>
             )}
           </button>
@@ -67,7 +80,7 @@ export function CodeViewer({ onCodeChanged, handleSave, setMessageInput, message
 
       {/* Code Display */}
       <div className="relative">
-        <SandpackLayout >
+        <SandpackLayout>
           <SandpackCodeEditor showLineNumbers />
         </SandpackLayout>
       </div>

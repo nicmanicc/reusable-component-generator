@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, MessageSquare, User, Sparkles } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { ChatMessage } from '../dashboard/page';
-import Header from './Header';
 
 interface ChatInterfaceProps {
   messages: ChatMessage[];
@@ -12,7 +11,12 @@ interface ChatInterfaceProps {
   refinementSuggestions: string[];
 }
 
-export function ChatInterface({ messages, onSendMessage, isGenerating, refinementSuggestions }: ChatInterfaceProps) {
+export function ChatInterface({
+  messages,
+  onSendMessage,
+  isGenerating,
+  refinementSuggestions,
+}: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -33,56 +37,63 @@ export function ChatInterface({ messages, onSendMessage, isGenerating, refinemen
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col h-full sticky top-24">
-      <Header title="Refine Component" icon={MessageSquare} />
+    <div className="bg-parchment border border-rule overflow-hidden flex flex-col h-full sticky top-24">
+      {/* Panel header */}
+      <div className="px-4 py-3 border-b border-rule flex items-center gap-2">
+        <span className="text-[0.58rem] tracking-[0.22em] uppercase text-mid font-medium">
+          Refine Component
+        </span>
+        <span className="text-teal text-[0.55rem] ml-auto animate-ca-blink">
+          ●
+        </span>
+      </div>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-
-
-        {(
-          messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-            >
-              {message.role === 'assistant' && (
-                <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4 text-white" />
-                </div>
-              )}
-              <div
-                className={`max-w-[80%] rounded-lg px-4 py-3 ${message.role === 'user'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'
-                  }`}
-              >
-                <p className="text-sm">{message.content}</p>
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex gap-2.5 ${
+              message.role === 'user' ? 'justify-end' : 'justify-start'
+            }`}
+          >
+            {message.role === 'assistant' && (
+              <div className="w-5 h-5 border border-teal flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-teal text-[0.5rem] font-medium">[/]</span>
               </div>
-              {message.role === 'user' && (
-                <div className="w-8 h-8 bg-slate-300 dark:bg-slate-700 rounded-lg flex items-center justify-center shrink-0">
-                  <User className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                </div>
-              )}
+            )}
+            <div
+              className={`max-w-[82%] px-3 py-2.5 text-[0.72rem] font-dm-mono leading-[1.7] ${
+                message.role === 'user'
+                  ? 'bg-ink text-parchment'
+                  : 'border border-rule text-ink'
+              }`}
+            >
+              {message.content}
             </div>
-          ))
-        )}
+            {message.role === 'user' && (
+              <div className="w-5 h-5 border border-rule flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-mid text-[0.5rem]">U</span>
+              </div>
+            )}
+          </div>
+        ))}
 
-        {
-          refinementSuggestions.length > 0 &&
-          <div className="text-center space-y-4 py-8">
-            <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center mx-auto">
-              <MessageSquare className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+        {refinementSuggestions.length > 0 && (
+          <div className="text-center space-y-3 py-6">
+            <div className="w-8 h-8 border border-rule flex items-center justify-center mx-auto">
+              <span className="text-[0.58rem] text-mid tracking-wide">+</span>
             </div>
             <div className="space-y-2">
-              <p className="text-xs text-slate-400 dark:text-slate-500">Quick actions:</p>
-              <div className="flex flex-wrap gap-2 justify-center">
+              <p className="text-[0.58rem] tracking-[0.18em] uppercase text-mid">
+                Quick actions:
+              </p>
+              <div className="flex flex-wrap gap-1.5 justify-center">
                 {refinementSuggestions.map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => setInput(suggestion)}
                     disabled={isGenerating}
-                    className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-2.5 py-1 border border-rule text-[0.62rem] font-dm-mono text-mid hover:border-teal hover:text-ink transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-transparent cursor-pointer"
                   >
                     {suggestion}
                   </button>
@@ -90,20 +101,19 @@ export function ChatInterface({ messages, onSendMessage, isGenerating, refinemen
               </div>
             </div>
           </div>
-
-        }
+        )}
 
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-        <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="p-3 border-t border-rule bg-parchment">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask for changes..."
-            className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"
+            className="w-full px-3 py-2.5 border border-rule bg-parchment text-ink font-dm-mono text-[0.75rem] placeholder:text-mid/40 focus:outline-none focus:border-teal transition-colors resize-none"
             rows={3}
             disabled={isGenerating}
             onKeyDown={(e) => {
@@ -116,19 +126,17 @@ export function ChatInterface({ messages, onSendMessage, isGenerating, refinemen
           <button
             type="submit"
             disabled={!input.trim() || isGenerating}
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="lp-cta-slide font-dm-mono text-[0.65rem] font-medium tracking-[0.14em] uppercase bg-ink text-parchment px-4 py-2.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {isGenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm">Processing...</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                <span className="text-sm">Send</span>
-              </>
-            )}
+            <span className="relative z-1 flex items-center gap-1.5">
+              {isGenerating ? (
+                'Processing…'
+              ) : (
+                <>
+                  <Send className="w-3 h-3" /> Send
+                </>
+              )}
+            </span>
           </button>
         </form>
       </div>

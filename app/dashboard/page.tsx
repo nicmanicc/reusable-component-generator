@@ -5,7 +5,7 @@ import { ComponentGenerator } from '../components/ComponentGenerator';
 import { CodeViewer } from '../components/CodeViewer';
 import { ComponentPreview } from '../components/ComponentPreview';
 import { ChatInterface } from '../components/ChatInterface';
-import { Sparkles, LogOut, X, Menu } from 'lucide-react';
+import { LogOut, X, Menu } from 'lucide-react';
 import { SandpackProvider } from '@codesandbox/sandpack-react';
 import type { SandpackFiles } from '@codesandbox/sandpack-react';
 import { generateComponent } from '../actions/generateComponent';
@@ -27,7 +27,6 @@ import {
   TreeSidebar,
   Version,
 } from '../components/TreeSideBar';
-import ToggleThemeButton from '../components/ToggleThemeButton';
 import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -95,7 +94,9 @@ export default function App() {
   const { data: user } = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       return user;
     },
   });
@@ -315,7 +316,9 @@ export default function App() {
       assistantMessage.content,
     );
 
-    queryClient.invalidateQueries({ queryKey: ['chatMessages', selectedComponentId] });
+    queryClient.invalidateQueries({
+      queryKey: ['chatMessages', selectedComponentId],
+    });
     setIsGenerating(false);
   };
 
@@ -376,59 +379,48 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-linear-to-br dark:from-slate-900 dark:to-slate-800 from-slate-50 to-slate-100  ">
+    <div className="font-dm-mono bg-parchment text-ink min-h-dvh flex flex-col lp-crosshatch">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 shadow-sm">
-        <div className="mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                title="Toggle sidebar"
-              >
-                {sidebarOpen ? (
-                  <X className="w-5 h-5" />
-                ) : (
-                  <Menu className="w-5 h-5" />
-                )}
-              </button>
-              <div className="bg-linear-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-slate-900 dark:text-white">ShareUI</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Describe, preview, refine, and copy your components with ease.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <ToggleThemeButton />
-              <div className="flex items-center gap-3 pl-3 border-l border-slate-300 dark:border-slate-600">
-                <div className="text-right">
-                  <p className="text-sm text-slate-900 dark:text-white">
-                    {user?.user_metadata?.full_name || user?.email}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {user?.email}
-                  </p>
-                </div>
-                <button
-                  onClick={() => signout()}
-                  className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                  title="Sign out"
-                >
-                  <LogOut className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
+      <header className="z-40 bg-parchment border-b border-rule sticky top-0 flex items-center justify-between px-6 h-13">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="lg:hidden text-mid hover:text-ink transition-colors bg-transparent border-none p-0 cursor-pointer"
+            title="Toggle sidebar"
+          >
+            {sidebarOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Menu className="w-4 h-4" />
+            )}
+          </button>
+          <div className="font-dm-mono text-[0.78rem] font-medium tracking-[0.22em] uppercase text-ink flex items-center gap-2.5">
+            <span className="text-teal text-[1.05rem]">[/]</span>
+            ShareUI
           </div>
+          <span className="text-[0.6rem] tracking-[0.14em] uppercase text-mid border-l border-rule pl-4 hidden sm:block">
+            Component Studio
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-right hidden sm:block">
+            <p className="text-[0.65rem] tracking-widest text-ink">
+              {user?.user_metadata?.full_name || user?.email}
+            </p>
+          </div>
+          <button
+            onClick={() => signout()}
+            className="font-dm-mono text-[0.65rem] tracking-widest uppercase text-mid hover:text-ink flex items-center gap-1.5 bg-transparent border-none cursor-pointer transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Sign out</span>
+          </button>
         </div>
       </header>
 
       {/* Main Workspace - Split View */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="relative z-10 flex-1 flex overflow-hidden">
         {sidebarOpen && (
           <div
             className="lg:hidden fixed inset-0 bg-black/50 z-20"
@@ -441,8 +433,7 @@ export default function App() {
           className={`fixed lg:static inset-y-0 left-0 z-30
               w-64 shrink-0 h-screen
               transform transition-transform duration-300 ease-in-out
-              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-              ${sidebarOpen ? 'h-full' : 'h-[calc(100vh-5rem)]'}`}
+              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
         >
           <TreeSidebar
             projects={projects}
@@ -473,12 +464,16 @@ export default function App() {
                     isGenerating={isGenerating}
                   />
                 ) : (
-                  <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-12 text-center">
-                    <Sparkles className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
-                    <h2 className="text-slate-900 dark:text-white mb-2">
-                      Get Started
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400">
+                  <div className="border border-rule p-12 text-center">
+                    <div className="font-dm-serif italic text-teal text-[2.8rem] leading-none mb-6 opacity-20">
+                      [/]
+                    </div>
+                    <p className="text-[0.62rem] tracking-[0.28em] uppercase text-teal mb-2 lp-label-line inline-flex items-center gap-2">
+                      {!selectedProjectId
+                        ? 'Select a project'
+                        : 'Select a component'}
+                    </p>
+                    <p className="text-[0.75rem] text-mid mt-4">
                       {!selectedProjectId
                         ? 'Create or select a project to begin'
                         : 'Create or select a component to start generating'}
