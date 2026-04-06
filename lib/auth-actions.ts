@@ -1,8 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { getSupabaseAuthErrorCode } from "@/lib/auth/errors";
+import { authRatelimit } from "@/lib/ratelimit";
 import {
   LoginInputSchema,
   SignupInputSchema,
@@ -11,6 +13,11 @@ import {
 } from "@/lib/auth/schemas";
 
 export async function login(formData: FormData) {
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for")?.split(",")[0] ?? "anonymous";
+  const { success } = await authRatelimit.limit(`login:${ip}`);
+  if (!success) return { error: { code: "too_many_requests" } };
+
   const supabase = await createClient();
   const parsed = LoginInputSchema.safeParse({
     email: formData.get("email"),
@@ -32,6 +39,11 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for")?.split(",")[0] ?? "anonymous";
+  const { success } = await authRatelimit.limit(`signup:${ip}`);
+  if (!success) return { error: { code: "too_many_requests" } };
+
   const supabase = await createClient();
 
   const parsed = SignupInputSchema.safeParse({

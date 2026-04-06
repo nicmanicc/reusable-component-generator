@@ -1,9 +1,20 @@
 "use server";
 
 import OpenAI from "openai";
+import { createClient } from "@/utils/supabase/server";
+import { generationRatelimit } from "@/lib/ratelimit";
+
 const client = new OpenAI();
 
 export const generateComponent = async (promptInput: string, code?: string) => {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims?.sub;
+  if (!userId) throw new Error("Unauthenticated");
+
+  const { success } = await generationRatelimit.limit(userId);
+  if (!success) throw new Error("Daily generation limit reached");
+
   const response = await client.responses.create({
     model: "gpt-5-mini",
     prompt: {

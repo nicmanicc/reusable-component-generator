@@ -4,6 +4,7 @@ export const SUPABASE_AUTH_ERROR_CODES = {
   EMAIL_NOT_CONFIRMED: "email_not_confirmed",
   SIGNUP_DISABLED: "signup_disabled",
   RATE_LIMITED: "over_request_rate_limit",
+  TOO_MANY_REQUESTS: "too_many_requests",
 } as const;
 
 export type KnownSupabaseAuthErrorCode =
@@ -40,6 +41,8 @@ export function authErrorMessageFromCode(code: string | null): string | null {
       return "Signups are currently disabled.";
     case SUPABASE_AUTH_ERROR_CODES.RATE_LIMITED:
       return "Too many attempts. Try again later.";
+    case SUPABASE_AUTH_ERROR_CODES.TOO_MANY_REQUESTS:
+      return "Too many attempts. Please wait before trying again.";
     default:
       return null;
   }

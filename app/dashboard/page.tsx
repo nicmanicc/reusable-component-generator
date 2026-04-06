@@ -192,7 +192,7 @@ export default function App() {
     if (
       currentVersionId === null ||
       versions.find((v) => v.id === currentVersionId)?.componentId !==
-        componentId
+      componentId
     ) {
       const latestVersion = versions
         .filter((v) => v.componentId === componentId)
@@ -225,54 +225,66 @@ export default function App() {
   ) => {
     setIsGenerating(true);
 
-    await createChatMessage(selectedComponentId as string, 'user', prompt);
+    try {
+      await createChatMessage(selectedComponentId as string, 'user', prompt);
 
-    const response = JSON.parse(
-      isRefinement
-        ? await generateComponent(prompt, updatedCode)
-        : await generateComponent(prompt),
-    );
-
-    const refinedComponent = response.code;
-    let assistantMessage: ChatMessage = {
-      role: 'assistant',
-      content: isRefinement
-        ? `I've updated the component based on your request: "${prompt}"`
-        : `I've generated a new component based on your prompt: "${prompt}"`,
-      timestamp: new Date(),
-    };
-    if (!response.changed) {
-      assistantMessage = {
-        role: 'assistant',
-        content: `The requested changes could not be applied. Here's the original component code.`,
-        timestamp: new Date(),
-      };
-    } else {
-      const versionLength = versions.filter(
-        (v) => v.componentId === selectedComponentId,
-      ).length;
-      const version = await createVersion(
-        selectedComponentId as string,
-        versionLength + 1,
-        prompt,
-        refinedComponent,
+      const response = JSON.parse(
+        isRefinement
+          ? await generateComponent(prompt, updatedCode)
+          : await generateComponent(prompt),
       );
 
-      setCurrentVersionId(version.id);
-      setRefinementSuggestions(response.actions || []);
-      queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
+      const refinedComponent = response.code;
+      let assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: isRefinement
+          ? `I've updated the component based on your request: "${prompt}"`
+          : `I've generated a new component based on your prompt: "${prompt}"`,
+        timestamp: new Date(),
+      };
+      if (!response.changed) {
+        assistantMessage = {
+          role: 'assistant',
+          content: `The requested changes could not be applied. Here's the original component code.`,
+          timestamp: new Date(),
+        };
+      } else {
+        const versionLength = versions.filter(
+          (v) => v.componentId === selectedComponentId,
+        ).length;
+        const version = await createVersion(
+          selectedComponentId as string,
+          versionLength + 1,
+          prompt,
+          refinedComponent,
+        );
+
+        setCurrentVersionId(version.id);
+        setRefinementSuggestions(response.actions || []);
+        queryClient.invalidateQueries({ queryKey: ['projects', user?.id] });
+      }
+
+      await createChatMessage(
+        selectedComponentId as string,
+        'assistant',
+        assistantMessage.content,
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: ['chatMessages', selectedComponentId],
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'Daily generation limit reached'
+      ) {
+        toast.error('Daily generation limit reached. Please try again tomorrow.');
+      } else {
+        toast.error('Something went wrong. Please try again.');
+      }
+    } finally {
+      setIsGenerating(false);
     }
-
-    await createChatMessage(
-      selectedComponentId as string,
-      'assistant',
-      assistantMessage.content,
-    );
-
-    queryClient.invalidateQueries({
-      queryKey: ['chatMessages', selectedComponentId],
-    });
-    setIsGenerating(false);
   };
 
   const handleSave = async () => {
@@ -325,8 +337,8 @@ export default function App() {
     () =>
       currentVersion
         ? {
-            '/App.tsx': currentVersion.code,
-          }
+          '/App.tsx': currentVersion.code,
+        }
         : undefined,
     [currentVersion],
   );
