@@ -11,6 +11,6 @@ export const authRatelimit = new Ratelimit({
 
 export const generationRatelimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(1, "1 d"),
+  limiter: Ratelimit.slidingWindow(10, "1 d"),
   prefix: "ratelimit:generation",
 });
